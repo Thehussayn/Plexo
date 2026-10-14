@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { EyeOff } from 'lucide-react';
-import { DocumentNode, AlignmentGuide } from '../../types/editor';
-import { useEditor, isDescendant, resolveNodeStyles, findNode } from '../../context/EditorContext';
+import { DocumentNode, AlignmentGuide, ElementStyles } from '../../types/editor';
+import { useEditor, isDescendant, resolveNodeStyles, findNode, findParentNode } from '../../context/EditorContext';
 import { useFrameBreakpoint } from '../../context/FrameContext';
 import { useParentLayout, ParentLayoutContext } from '../../context/ParentLayoutContext';
 import { ContextualToolbar } from './ContextualToolbar';
@@ -37,6 +37,7 @@ export const NodeRenderer: React.FC<NodeRendererProps> = ({ node }) => {
     setViewportMode,
     canvasZoom,
     updateNodeStylesLive,
+    commitFreeMovement,
     commitHistory,
     snapToGrid,
     snapToElements,
@@ -53,7 +54,8 @@ export const NodeRenderer: React.FC<NodeRendererProps> = ({ node }) => {
   const styles = resolveNodeStyles(node, activeViewport);
 
   const parentLayout = useParentLayout();
-  const isFreeChild = node.type !== 'page';
+  // Sections and Root Pages stay in structured document flow; children inside sections/containers move freely
+  const isFreeChild = node.type !== 'page' && node.type !== 'section';
   const isGridChild = parentLayout.layoutMode === 'grid';
   const hasFreeCoords = typeof styles.x === 'number' || typeof styles.y === 'number' || styles.position === 'absolute';
 
@@ -90,6 +92,31 @@ export const NodeRenderer: React.FC<NodeRendererProps> = ({ node }) => {
       }
     }
   }, [isEditing]);
+
+  // Flow Spacer placeholder check - preserves surrounding flow layout without collapse
+  if (node.props?.isFlowSpacer) {
+    return (
+      <div
+        id={node.id}
+        aria-hidden="true"
+        style={{
+          display: 'block',
+          width: styles.width || '100%',
+          height: styles.height || styles.minHeight || '0px',
+          minHeight: styles.minHeight || styles.height || '0px',
+          flexShrink: 0,
+          margin: styles.margin,
+          marginTop: styles.marginTop,
+          marginBottom: styles.marginBottom,
+          marginLeft: styles.marginLeft,
+          marginRight: styles.marginRight,
+          padding: 0,
+          pointerEvents: 'none',
+          visibility: 'hidden',
+        }}
+      />
+    );
+  }
 
   // If node is hidden globally or hidden on current device in Preview Mode, omit
   if (node.hidden || (isHiddenOnCurrentDevice && isPreviewMode)) {
@@ -220,6 +247,8 @@ export const NodeRenderer: React.FC<NodeRendererProps> = ({ node }) => {
 
   // Free Layout Pointer-Drag Movement Engine
   const [isFreeDragging, setIsFreeDragging] = useState(false);
+  const isFreeDraggingRef = useRef(false);
+  const coordBadgeRef = useRef<HTMLDivElement | null>(null);
   const freeDragStartRef = useRef<{
     pointerX: number;
     pointerY: number;
@@ -229,8 +258,19 @@ export const NodeRenderer: React.FC<NodeRendererProps> = ({ node }) => {
     parentH: number;
     nodeW: number;
     nodeH: number;
+    wasInFlow: boolean;
+    parentId: string | null;
+    childIndex: number;
     siblings: DocumentNode[];
     nodeStarts: Array<{ id: string; startX: number; startY: number }>;
+  } | null>(null);
+  const lastDragPosRef = useRef<{
+    targetX: number;
+    targetY: number;
+    parentW: number;
+    parentH: number;
+    nodeW: number;
+    nodeH: number;
   } | null>(null);
 
   const handleFreePointerDown = (e: React.PointerEvent) => {
@@ -238,7 +278,6 @@ export const NodeRenderer: React.FC<NodeRendererProps> = ({ node }) => {
     const target = e.target as HTMLElement;
     if (
       target.closest('.no-drag') ||
-      target.tagName.toLowerCase() === 'button' ||
       target.tagName.toLowerCase() === 'input' ||
       target.tagName.toLowerCase() === 'textarea'
     ) {
@@ -254,17 +293,24 @@ export const NodeRenderer: React.FC<NodeRendererProps> = ({ node }) => {
       selectNode(node.id);
     }
 
-    const parentNode = findNode(documentTree, parentLayout.parentId);
-    const siblings = parentNode?.children?.filter((c) => c.id !== node.id) || [];
     const parentEl = (e.currentTarget as HTMLElement).parentElement;
-    const parentRect = parentEl?.getBoundingClientRect();
+    if (!parentEl) return;
+    const parentRect = parentEl.getBoundingClientRect();
     const nodeRect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const zoomScale = Math.max(0.2, (canvasZoom || 100) / 100);
 
-    const renderedRelX = parentRect ? (nodeRect.left - parentRect.left) / zoomScale : 0;
-    const renderedRelY = parentRect ? (nodeRect.top - parentRect.top) / zoomScale : 0;
+    const parentBorderLeft = parentEl.clientLeft || 0;
+    const parentBorderTop = parentEl.clientTop || 0;
+    const renderedRelX = (nodeRect.left - (parentRect.left + parentBorderLeft * zoomScale)) / zoomScale;
+    const renderedRelY = (nodeRect.top - (parentRect.top + parentBorderTop * zoomScale)) / zoomScale;
+
     const startX = typeof styles.x === 'number' ? styles.x : Math.round(renderedRelX);
     const startY = typeof styles.y === 'number' ? styles.y : Math.round(renderedRelY);
+
+    const parentInfo = findParentNode(documentTree, node.id);
+    const siblings = parentInfo?.parent.children?.filter((c) => c.id !== node.id && !c.props?.isFlowSpacer) || [];
+
+    const wasInFlow = styles.position !== 'absolute' && typeof styles.x !== 'number';
 
     const activeSelectedIds = selectedNodeIds.includes(node.id)
       ? selectedNodeIds
@@ -272,15 +318,17 @@ export const NodeRenderer: React.FC<NodeRendererProps> = ({ node }) => {
 
     const freeNodes = activeSelectedIds
       .map((id) => findNode(documentTree, id))
-      .filter((n): n is DocumentNode => Boolean(n && n.type !== 'page'));
+      .filter((n): n is DocumentNode => Boolean(n && n.type !== 'page' && n.type !== 'section'));
 
     const nodeStarts = freeNodes.map((n) => {
       const nEl = document.getElementById(n.id);
       const nParentEl = nEl?.parentElement;
       const nRect = nEl?.getBoundingClientRect();
       const nPRect = nParentEl?.getBoundingClientRect();
-      const nRelX = (nRect && nPRect) ? (nRect.left - nPRect.left) / zoomScale : 0;
-      const nRelY = (nRect && nPRect) ? (nRect.top - nPRect.top) / zoomScale : 0;
+      const nPBLeft = nParentEl?.clientLeft || 0;
+      const nPBTop = nParentEl?.clientTop || 0;
+      const nRelX = (nRect && nPRect) ? (nRect.left - (nPRect.left + nPBLeft * zoomScale)) / zoomScale : 0;
+      const nRelY = (nRect && nPRect) ? (nRect.top - (nPRect.top + nPBTop * zoomScale)) / zoomScale : 0;
       return {
         id: n.id,
         startX: typeof n.styles.x === 'number' ? n.styles.x : Math.round(nRelX),
@@ -288,28 +336,56 @@ export const NodeRenderer: React.FC<NodeRendererProps> = ({ node }) => {
       };
     });
 
+    const parentW = parentEl.clientWidth || (parentRect.width / zoomScale);
+    const parentH = parentEl.clientHeight || (parentRect.height / zoomScale);
+    const nodeW = nodeRect.width / zoomScale;
+    const nodeH = nodeRect.height / zoomScale;
+
     freeDragStartRef.current = {
       pointerX: e.clientX,
       pointerY: e.clientY,
       startX,
       startY,
-      parentW: parentRect ? parentRect.width / zoomScale : 1200,
-      parentH: parentRect ? parentRect.height / zoomScale : 600,
-      nodeW: nodeRect ? nodeRect.width / zoomScale : 200,
-      nodeH: nodeRect ? nodeRect.height / zoomScale : 100,
+      parentW,
+      parentH,
+      nodeW,
+      nodeH,
+      wasInFlow,
+      parentId: parentInfo ? parentInfo.parent.id : null,
+      childIndex: parentInfo ? parentInfo.index : -1,
       siblings,
       nodeStarts: nodeStarts.length > 0 ? nodeStarts : [{ id: node.id, startX, startY }],
     };
+    lastDragPosRef.current = {
+      targetX: startX,
+      targetY: startY,
+      parentW,
+      parentH,
+      nodeW,
+      nodeH,
+    };
+    isFreeDraggingRef.current = true;
     setIsFreeDragging(true);
   };
 
   const handleFreePointerMove = (e: React.PointerEvent) => {
-    if (!isFreeDragging || !freeDragStartRef.current) return;
+    if (!isFreeDraggingRef.current || !freeDragStartRef.current) return;
     e.stopPropagation();
     e.preventDefault();
 
-    const { pointerX, pointerY, startX, startY, parentW, parentH, nodeW, nodeH, siblings, nodeStarts } =
-      freeDragStartRef.current;
+    const {
+      pointerX,
+      pointerY,
+      startX,
+      startY,
+      parentW,
+      parentH,
+      nodeW,
+      nodeH,
+      siblings,
+      nodeStarts,
+    } = freeDragStartRef.current;
+
     const zoomFactor = Math.max(0.2, (canvasZoom || 100) / 100);
     const deltaX = (e.clientX - pointerX) / zoomFactor;
     const deltaY = (e.clientY - pointerY) / zoomFactor;
@@ -395,58 +471,181 @@ export const NodeRenderer: React.FC<NodeRendererProps> = ({ node }) => {
       targetY = Math.round(targetY / gridSnapSize) * gridSnapSize;
     }
 
-    const rightOffset = Math.round(Math.max(0, parentW - (targetX + nodeW)));
-    const bottomOffset = Math.round(Math.max(0, parentH - (targetY + nodeH)));
-    const centerOffsetX = Math.round((targetX + nodeW / 2) - parentW / 2);
-    const centerOffsetY = Math.round((targetY + nodeH / 2) - parentH / 2);
-    const scaleLeft = parseFloat(((targetX / parentW) * 100).toFixed(2));
-    const scaleWidth = parseFloat(((nodeW / parentW) * 100).toFixed(2));
-    const scaleTop = parseFloat(((targetY / parentH) * 100).toFixed(2));
-    const scaleHeight = parseFloat(((nodeH / parentH) * 100).toFixed(2));
+    lastDragPosRef.current = {
+      targetX,
+      targetY,
+      parentW,
+      parentH,
+      nodeW,
+      nodeH,
+    };
 
-    setActiveAlignmentGuides(guides);
+    // Direct GPU-accelerated DOM transform: zero React re-renders during pointermove!
+    const effectiveDeltaX = Math.round(targetX - startX);
+    const effectiveDeltaY = Math.round(targetY - startY);
 
-    const effectiveDeltaX = targetX - startX;
-    const effectiveDeltaY = targetY - startY;
+    if (elementRef.current) {
+      const existingTransforms = transformParts.filter((t) => !t.startsWith('translate3d'));
+      const combined = [`translate3d(${effectiveDeltaX}px, ${effectiveDeltaY}px, 0px)`, ...existingTransforms].join(' ');
+      elementRef.current.style.transform = combined;
+    }
 
-    nodeStarts.forEach(({ id, startX: origX, startY: origY }) => {
-      if (id === node.id) {
-        updateNodeStylesLive(node.id, {
-          x: Math.round(targetX),
-          y: Math.round(targetY),
-          rightOffset,
-          bottomOffset,
-          centerOffsetX,
-          centerOffsetY,
-          scaleLeft,
-          scaleWidth,
-          scaleTop,
-          scaleHeight,
-          position: 'absolute',
-        });
-      } else {
-        updateNodeStylesLive(id, {
-          x: Math.round(origX + effectiveDeltaX),
-          y: Math.round(origY + effectiveDeltaY),
-          position: 'absolute',
-        });
+    // Direct update for other selected nodes
+    nodeStarts.forEach(({ id }) => {
+      if (id !== node.id) {
+        const otherEl = document.getElementById(id);
+        if (otherEl) {
+          otherEl.style.transform = `translate3d(${effectiveDeltaX}px, ${effectiveDeltaY}px, 0px)`;
+        }
       }
     });
+
+    // Direct update for coordinate badge text
+    if (coordBadgeRef.current) {
+      coordBadgeRef.current.textContent = `X: ${Math.round(targetX)}px · Y: ${Math.round(targetY)}px`;
+    }
+
+    if (guides.length > 0 || activeAlignmentGuides.length > 0) {
+      setActiveAlignmentGuides(guides);
+    }
   };
 
   const handleFreePointerUp = (e: React.PointerEvent) => {
-    if (!isFreeDragging) return;
+    if (!isFreeDraggingRef.current) return;
+    isFreeDraggingRef.current = false;
     e.stopPropagation();
     e.preventDefault();
+
     try {
       (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
     } catch {
       // ignore
     }
-    setIsFreeDragging(false);
+
+    // Clear direct DOM transforms
+    if (elementRef.current) {
+      elementRef.current.style.transform = transformParts.length > 0 ? transformParts.join(' ') : '';
+    }
+
+    const dragStart = freeDragStartRef.current;
+    const lastPos = lastDragPosRef.current;
     freeDragStartRef.current = null;
+    lastDragPosRef.current = null;
+    setIsFreeDragging(false);
     setActiveAlignmentGuides([]);
-    commitHistory();
+
+    if (!dragStart || !lastPos) return;
+
+    // Reset direct transforms on other multi-selected nodes
+    dragStart.nodeStarts.forEach(({ id }) => {
+      if (id !== node.id) {
+        const otherEl = document.getElementById(id);
+        if (otherEl) otherEl.style.transform = '';
+      }
+    });
+
+    const { startX, startY, parentW, parentH, nodeW, nodeH, wasInFlow, parentId, childIndex } = dragStart;
+    const { targetX, targetY } = lastPos;
+
+    // Ignore tiny accidental micro-movements (< 2px threshold)
+    const moved = Math.hypot(targetX - startX, targetY - startY) > 2;
+    if (!moved) return;
+
+    const finalX = Math.round(targetX);
+    const finalY = Math.round(targetY);
+    const rightOffset = Math.round(Math.max(0, parentW - (finalX + nodeW)));
+    const bottomOffset = Math.round(Math.max(0, parentH - (finalY + nodeH)));
+    const centerOffsetX = Math.round((finalX + nodeW / 2) - parentW / 2);
+    const centerOffsetY = Math.round((finalY + nodeH / 2) - parentH / 2);
+    const scaleLeft = parseFloat(((finalX / parentW) * 100).toFixed(2));
+    const scaleWidth = parseFloat(((nodeW / parentW) * 100).toFixed(2));
+    const scaleTop = parseFloat(((finalY / parentH) * 100).toFixed(2));
+    const scaleHeight = parseFloat(((nodeH / parentH) * 100).toFixed(2));
+
+    const nodeStyleUpdates: Partial<ElementStyles> = {
+      position: 'absolute',
+      x: finalX,
+      y: finalY,
+      width: `${Math.round(nodeW)}px`,
+      customWidth: `${Math.round(nodeW)}px`,
+      height: `${Math.round(nodeH)}px`,
+      rightOffset,
+      bottomOffset,
+      centerOffsetX,
+      centerOffsetY,
+      scaleLeft,
+      scaleWidth,
+      scaleTop,
+      scaleHeight,
+    };
+
+    const updates: Array<{ id: string; styles: Partial<ElementStyles> }> = [
+      { id: node.id, styles: nodeStyleUpdates },
+    ];
+
+    const effectiveDeltaX = targetX - startX;
+    const effectiveDeltaY = targetY - startY;
+
+    dragStart.nodeStarts.forEach(({ id, startX: origX, startY: origY }) => {
+      if (id !== node.id) {
+        updates.push({
+          id,
+          styles: {
+            position: 'absolute',
+            x: Math.round(origX + effectiveDeltaX),
+            y: Math.round(origY + effectiveDeltaY),
+          },
+        });
+      }
+    });
+
+    let spacer: { parentId: string; index: number; spacerNode: DocumentNode } | undefined = undefined;
+    let parentLock: { parentId: string; styles: Partial<ElementStyles> } | undefined = undefined;
+
+    if (wasInFlow && parentId && childIndex !== -1) {
+      // 1. Create invisible flow spacer to reserve the vacated slot in document flow
+      spacer = {
+        parentId,
+        index: childIndex,
+        spacerNode: {
+          id: `spacer-${node.id}`,
+          type: 'spacer',
+          name: '',
+          props: { isFlowSpacer: true },
+          styles: {
+            width: `${Math.round(nodeW)}px`,
+            height: `${Math.round(nodeH)}px`,
+            minHeight: `${Math.round(nodeH)}px`,
+            flexShrink: 0,
+            margin: node.styles.margin,
+            marginTop: node.styles.marginTop,
+            marginBottom: node.styles.marginBottom,
+            marginLeft: node.styles.marginLeft,
+            marginRight: node.styles.marginRight,
+            padding: '0px',
+            opacity: 0,
+            pointerEvents: 'none',
+          },
+        },
+      };
+
+      // 2. Lock parent container minHeight to prevent content-driven collapse
+      const parentNode = findNode(documentTree, parentId);
+      if (!parentNode?.styles.height || parentNode.styles.height === 'auto') {
+        parentLock = {
+          parentId,
+          styles: {
+            minHeight: parentNode?.styles.minHeight || `${Math.round(parentH)}px`,
+          },
+        };
+      }
+    }
+
+    commitFreeMovement({
+      updates,
+      parentLock,
+      spacer,
+    });
   };
 
   // Apply Stack on Mobile responsive behavior
@@ -564,6 +763,7 @@ export const NodeRenderer: React.FC<NodeRendererProps> = ({ node }) => {
     justifyContent: styles.justifyContent,
     alignItems: styles.alignItems,
     flexWrap: styles.flexWrap,
+    flexShrink: styles.flexShrink,
     gap: styles.gap || (isGridContainer ? styles.gridGap || '20px' : undefined),
     width: hasFreeCoords ? computedWidth : resolvedWidth,
     maxWidth: resolvedMaxWidth,
@@ -615,6 +815,7 @@ export const NodeRenderer: React.FC<NodeRendererProps> = ({ node }) => {
     borderStyle: styles.borderStyle,
     borderColor: styles.borderColor,
     boxShadow: styles.boxShadow,
+    pointerEvents: styles.pointerEvents,
   };
 
   // Selection overlay, badges, handles, and drop indicators
@@ -645,7 +846,10 @@ export const NodeRenderer: React.FC<NodeRendererProps> = ({ node }) => {
 
         {/* Live Coordinate Badge during active Free drag */}
         {isFreeDragging && (
-          <div className="absolute -top-7 left-1/2 -translate-x-1/2 z-50 bg-[#161A24] text-purple-300 font-mono text-[10px] px-2 py-0.5 rounded border border-purple-500/60 shadow-xl pointer-events-none whitespace-nowrap">
+          <div
+            ref={coordBadgeRef}
+            className="absolute -top-7 left-1/2 -translate-x-1/2 z-50 bg-[#161A24] text-purple-300 font-mono text-[10px] px-2 py-0.5 rounded border border-purple-500/60 shadow-xl pointer-events-none whitespace-nowrap"
+          >
             X: {styles.x || 0}px · Y: {styles.y || 0}px
           </div>
         )}

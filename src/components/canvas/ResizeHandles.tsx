@@ -8,7 +8,7 @@ interface ResizeHandlesProps {
 }
 
 export const ResizeHandles: React.FC<ResizeHandlesProps> = ({ node, elementRef }) => {
-  const { updateNodeStylesLive, commitHistory, canvasZoom, resolveStyles } = useEditor();
+  const { updateNodeStyles, canvasZoom, resolveStyles } = useEditor();
   const [isResizing, setIsResizing] = useState(false);
   const [liveDimensions, setLiveDimensions] = useState<{ width: number; height: number } | null>(null);
 
@@ -22,6 +22,8 @@ export const ResizeHandles: React.FC<ResizeHandlesProps> = ({ node, elementRef }
     startYPos: number;
     handle: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'right' | 'left' | 'top' | 'bottom';
   } | null>(null);
+
+  const pendingUpdatesRef = useRef<any>(null);
 
   const handlePointerDown = (
     e: React.PointerEvent<HTMLDivElement>,
@@ -76,13 +78,19 @@ export const ResizeHandles: React.FC<ResizeHandlesProps> = ({ node, elementRef }
       newHeight = Math.max(24, startHeight - deltaY);
     }
 
-    setLiveDimensions({ width: Math.round(newWidth), height: Math.round(newHeight) });
+    const roundedW = Math.round(newWidth);
+    const roundedH = Math.round(newHeight);
+    setLiveDimensions({ width: roundedW, height: roundedH });
+
+    // Direct DOM manipulation during resize for smooth 60fps response
+    if (elementRef.current) {
+      elementRef.current.style.width = `${roundedW}px`;
+      elementRef.current.style.height = `${roundedH}px`;
+    }
 
     const resolved = resolveStyles(node);
     if (resolved.position === 'absolute') {
       const updates: any = {};
-      const roundedW = Math.round(newWidth);
-      const roundedH = Math.round(newHeight);
 
       if (handle.includes('left') || handle.includes('right')) {
         updates.width = `${roundedW}px`;
@@ -91,6 +99,7 @@ export const ResizeHandles: React.FC<ResizeHandlesProps> = ({ node, elementRef }
         const currX = handle.includes('left') ? startXPos + (startWidth - roundedW) : startXPos;
         if (handle.includes('left')) {
           updates.x = Math.round(currX);
+          if (elementRef.current) elementRef.current.style.left = `${Math.round(currX)}px`;
         }
         updates.rightOffset = Math.round(Math.max(0, parentWidth - (currX + roundedW)));
         updates.centerOffsetX = Math.round((currX + roundedW / 2) - parentWidth / 2);
@@ -102,24 +111,25 @@ export const ResizeHandles: React.FC<ResizeHandlesProps> = ({ node, elementRef }
         updates.minHeight = `${roundedH}px`;
         updates.heightSizing = 'fixed';
         if (handle.includes('top')) {
-          updates.y = Math.round(startYPos + (startHeight - roundedH));
+          const currY = startYPos + (startHeight - roundedH);
+          updates.y = Math.round(currY);
+          if (elementRef.current) elementRef.current.style.top = `${Math.round(currY)}px`;
         }
       }
 
-      updateNodeStylesLive(node.id, updates);
+      pendingUpdatesRef.current = updates;
     } else {
+      const updates: any = {};
       if (handle.includes('bottom') || handle.includes('top')) {
-        updateNodeStylesLive(node.id, {
-          minHeight: `${Math.round(newHeight)}px`,
-        });
+        updates.minHeight = `${roundedH}px`;
+        updates.height = `${roundedH}px`;
       }
       if (handle.includes('right') || handle.includes('left')) {
-        updateNodeStylesLive(node.id, {
-          customWidth: `${Math.round(newWidth)}px`,
-          width: `${Math.round(newWidth)}px`,
-          widthSizing: 'fixed',
-        });
+        updates.customWidth = `${roundedW}px`;
+        updates.width = `${roundedW}px`;
+        updates.widthSizing = 'fixed';
       }
+      pendingUpdatesRef.current = updates;
     }
   };
 
@@ -132,10 +142,15 @@ export const ResizeHandles: React.FC<ResizeHandlesProps> = ({ node, elementRef }
     } catch {
       // ignore
     }
+
+    if (pendingUpdatesRef.current) {
+      updateNodeStyles(node.id, pendingUpdatesRef.current);
+      pendingUpdatesRef.current = null;
+    }
+
     setIsResizing(false);
     setLiveDimensions(null);
     startDragRef.current = null;
-    commitHistory();
   };
 
   return (

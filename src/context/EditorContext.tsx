@@ -18,6 +18,12 @@ import {
 import { samplePagesList } from '../data/samplePageData';
 import { insertableComponents } from '../data/insertableComponents';
 
+export interface FreeMovementCommit {
+  updates: Array<{ id: string; styles: Partial<ElementStyles> }>;
+  parentLock?: { parentId: string; styles: Partial<ElementStyles> };
+  spacer?: { parentId: string; index: number; spacerNode: DocumentNode };
+}
+
 interface EditorContextType {
   // Page & Document Tree
   pages: PageDefinition[];
@@ -109,6 +115,7 @@ interface EditorContextType {
   getInheritedStyle: (node: DocumentNode, propKey: keyof ElementStyles) => any;
   updateNodeStyles: (nodeId: string, styles: Partial<ElementStyles>) => void;
   updateNodeStylesLive: (nodeId: string, styles: Partial<ElementStyles>) => void;
+  commitFreeMovement: (commit: FreeMovementCommit) => void;
   resetResponsiveStyle: (nodeId: string, propKey: keyof ElementStyles) => void;
   resetAllResponsiveOverrides: (nodeId: string) => void;
   updateNodeResponsiveVisibility: (nodeId: string, visibility: Partial<ResponsiveVisibility>) => void;
@@ -757,6 +764,77 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
   }, [historyIndex, viewportMode]);
 
+  // Atomic commit for freeform movement (including flow spacer reservation and parent minHeight protection)
+  const commitFreeMovement = useCallback(
+    (commit: FreeMovementCommit) => {
+      let tree = documentTree;
+
+      // 1. If spacer is specified, insert it into parent's children at index
+      if (commit.spacer) {
+        const { parentId, index, spacerNode } = commit.spacer;
+        tree = updateNodeInTree(tree, parentId, (parent) => {
+          const currentChildren = parent.children ? [...parent.children] : [];
+          if (!currentChildren.some((c) => c.id === spacerNode.id)) {
+            const insertIdx = Math.max(0, Math.min(index, currentChildren.length));
+            currentChildren.splice(insertIdx, 0, spacerNode);
+          }
+          return {
+            ...parent,
+            children: currentChildren,
+          };
+        });
+      }
+
+      // 2. If parentLock is specified, update parent styles (e.g. minHeight)
+      if (commit.parentLock) {
+        const { parentId, styles: pStyles } = commit.parentLock;
+        tree = updateNodeInTree(tree, parentId, (parent) => {
+          if (viewportMode === 'desktop') {
+            return {
+              ...parent,
+              styles: { ...parent.styles, ...pStyles },
+            };
+          } else {
+            const currentResp = parent.responsive || {};
+            const bpOverrides = currentResp[viewportMode] || {};
+            return {
+              ...parent,
+              responsive: {
+                ...currentResp,
+                [viewportMode]: { ...bpOverrides, ...pStyles },
+              },
+            };
+          }
+        });
+      }
+
+      // 3. Apply updates to the moved node(s)
+      for (const update of commit.updates) {
+        tree = updateNodeInTree(tree, update.id, (node) => {
+          if (viewportMode === 'desktop') {
+            return {
+              ...node,
+              styles: { ...node.styles, ...update.styles },
+            };
+          } else {
+            const currentResp = node.responsive || {};
+            const bpOverrides = currentResp[viewportMode] || {};
+            return {
+              ...node,
+              responsive: {
+                ...currentResp,
+                [viewportMode]: { ...bpOverrides, ...update.styles },
+              },
+            };
+          }
+        });
+      }
+
+      pushHistory(tree);
+    },
+    [documentTree, viewportMode, pushHistory]
+  );
+
   // Reset a specific property override back to inherited value
   const resetResponsiveStyle = useCallback((nodeId: string, propKey: keyof ElementStyles) => {
     if (viewportMode === 'desktop') return;
@@ -829,7 +907,8 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const deleteNode = useCallback((nodeId: string) => {
     if (nodeId === documentTree.id) return;
     const parentInfo = findParentNode(documentTree, nodeId);
-    const updated = deleteNodeFromTree(documentTree, nodeId);
+    let updated = deleteNodeFromTree(documentTree, nodeId);
+    updated = deleteNodeFromTree(updated, `spacer-${nodeId}`);
     setSelectedNodeId(parentInfo ? parentInfo.parent.id : null);
     setEditingNodeId(null);
     pushHistory(updated);
@@ -1388,7 +1467,7 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       renderedRect?: { x: number; y: number; width?: number; height?: number }
     ) => {
       const target = findNode(documentTree, nodeId);
-      if (!target || target.type === 'page') return;
+      if (!target || target.type === 'page' || target.type === 'section') return;
 
       const parentInfo = findParentNode(documentTree, nodeId);
       if (!parentInfo) return;
@@ -1404,24 +1483,68 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const targetW = renderedRect?.width ?? (target.styles.width ? parseInt(target.styles.width) : 240);
       const targetH = renderedRect?.height ?? (target.styles.height ? parseInt(target.styles.height) : 100);
 
-      const updated = updateNodeInTree(documentTree, nodeId, (curr) => ({
-        ...curr,
-        styles: {
-          ...curr.styles,
-          position: 'absolute',
-          x: Math.round(targetX),
-          y: Math.round(targetY),
-          width: curr.styles.width || `${Math.round(targetW)}px`,
-          customWidth: curr.styles.customWidth || `${Math.round(targetW)}px`,
-          zIndex: maxZ + 1,
-          horizontalConstraint: curr.styles.horizontalConstraint || 'left',
-          verticalConstraint: curr.styles.verticalConstraint || 'top',
-        },
-      }));
+      const wasInFlow = target.styles.position !== 'absolute' && typeof target.styles.x !== 'number';
 
-      pushHistory(updated);
+      let spacer: { parentId: string; index: number; spacerNode: DocumentNode } | undefined = undefined;
+      let parentLock: { parentId: string; styles: Partial<ElementStyles> } | undefined = undefined;
+
+      if (wasInFlow) {
+        spacer = {
+          parentId: parent.id,
+          index: parentInfo.index,
+          spacerNode: {
+            id: `spacer-${nodeId}`,
+            type: 'spacer',
+            name: '',
+            props: { isFlowSpacer: true },
+            styles: {
+              width: `${Math.round(targetW)}px`,
+              height: `${Math.round(targetH)}px`,
+              minHeight: `${Math.round(targetH)}px`,
+              flexShrink: 0,
+              margin: target.styles.margin,
+              marginTop: target.styles.marginTop,
+              marginBottom: target.styles.marginBottom,
+              marginLeft: target.styles.marginLeft,
+              marginRight: target.styles.marginRight,
+              padding: '0px',
+              opacity: 0,
+              pointerEvents: 'none',
+            },
+          },
+        };
+
+        if (!parent.styles.height || parent.styles.height === 'auto') {
+          parentLock = {
+            parentId: parent.id,
+            styles: {
+              minHeight: parent.styles.minHeight || `${Math.round(targetH + targetY)}px`,
+            },
+          };
+        }
+      }
+
+      commitFreeMovement({
+        updates: [
+          {
+            id: nodeId,
+            styles: {
+              position: 'absolute',
+              x: Math.round(targetX),
+              y: Math.round(targetY),
+              width: target.styles.width || `${Math.round(targetW)}px`,
+              customWidth: target.styles.customWidth || `${Math.round(targetW)}px`,
+              zIndex: maxZ + 1,
+              horizontalConstraint: target.styles.horizontalConstraint || 'left',
+              verticalConstraint: target.styles.verticalConstraint || 'top',
+            },
+          },
+        ],
+        parentLock,
+        spacer,
+      });
     },
-    [documentTree, pushHistory]
+    [documentTree, commitFreeMovement]
   );
 
   const returnElementToStructuredLayout = useCallback(
@@ -1432,7 +1555,7 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const parentInfo = findParentNode(documentTree, nodeId);
       if (!parentInfo) return;
 
-      const updated = updateNodeInTree(documentTree, nodeId, (curr) => {
+      let updated = updateNodeInTree(documentTree, nodeId, (curr) => {
         const nextStyles = { ...curr.styles };
         delete nextStyles.position;
         delete nextStyles.x;
@@ -1453,6 +1576,9 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           styles: nextStyles,
         };
       });
+
+      // Remove the companion flow spacer if it exists
+      updated = deleteNodeFromTree(updated, `spacer-${nodeId}`);
 
       if (targetIndex !== undefined && parentInfo.parent.children) {
         const reordered = moveNodeInTree(
@@ -1701,6 +1827,7 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         getInheritedStyle,
         updateNodeStyles,
         updateNodeStylesLive,
+        commitFreeMovement,
         resetResponsiveStyle,
         resetAllResponsiveOverrides,
         updateNodeResponsiveVisibility,

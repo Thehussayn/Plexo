@@ -73,10 +73,15 @@ const LayerItem: React.FC<LayerItemProps> = ({ node, depth }) => {
     openContextMenu,
   } = useEditor();
 
+  if (node.props?.isFlowSpacer) {
+    return null;
+  }
+
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
   const [layerDropPos, setLayerDropPos] = useState<'before' | 'after' | null>(null);
 
-  const hasChildren = Boolean(node.children && node.children.length > 0);
+  const visibleChildren = node.children?.filter((c) => !c.props?.isFlowSpacer);
+  const hasChildren = Boolean(visibleChildren && visibleChildren.length > 0);
   const isSelected = selectedNodeIds ? selectedNodeIds.includes(node.id) : selectedNodeId === node.id;
   const isHovered = hoveredNodeId === node.id;
   const isRootPage = node.type === 'page';
@@ -287,7 +292,7 @@ const LayerItem: React.FC<LayerItemProps> = ({ node, depth }) => {
       {/* Children layers */}
       {hasChildren && isExpanded && (
         <div className="flex flex-col">
-          {node.children!.map((child) => (
+          {visibleChildren!.map((child) => (
             <LayerItem key={child.id} node={child} depth={depth + 1} />
           ))}
         </div>

@@ -54,6 +54,8 @@ export interface ElementStyles {
   heightSizing?: SizingMode;
   stackOnMobile?: boolean;
   flexWrap?: 'nowrap' | 'wrap' | 'wrap-reverse';
+  flexShrink?: number | string;
+  pointerEvents?: 'auto' | 'none' | 'inherit';
 
   // Layout
   display?: 'block' | 'flex' | 'grid' | 'inline-block';
