@@ -1,0 +1,669 @@
+import { DocumentNode, PageDefinition } from '../types/editor';
+
+export const sampleHomePageNode: DocumentNode = {
+  id: 'node-page-root',
+  type: 'page',
+  name: 'Page Root',
+  styles: {
+    backgroundColor: '#141414',
+    textColor: '#F3F4F6',
+    fontFamily: 'Inter',
+  },
+  children: [
+    // Top Announcement / Mini Bar
+    {
+      id: 'node-top-bar',
+      type: 'section',
+      name: 'Announcement Bar',
+      styles: {
+        backgroundColor: '#1A1A1A',
+        paddingTop: '8px',
+        paddingBottom: '8px',
+        borderWidth: '0px 0px 1px 0px',
+        borderStyle: 'solid',
+        borderColor: '#262626',
+      },
+      children: [
+        {
+          id: 'node-top-bar-text',
+          type: 'paragraph',
+          name: 'Announcement Text',
+          content: '🌿 Fresh seasonal harvest from Ilorin now available. Free consultations on select herbal wellness plans.',
+          styles: {
+            textAlign: 'center',
+            fontSize: '12px',
+            textColor: '#94A3B8',
+            fontWeight: '500',
+          },
+        },
+      ],
+    },
+
+    // Navigation Bar
+    {
+      id: 'node-nav',
+      type: 'section',
+      name: 'Navigation Bar',
+      styles: {
+        backgroundColor: '#161616',
+        paddingTop: '16px',
+        paddingBottom: '16px',
+        paddingLeft: '32px',
+        paddingRight: '32px',
+        borderWidth: '0px 0px 1px 0px',
+        borderStyle: 'solid',
+        borderColor: '#262626',
+      },
+      children: [
+        {
+          id: 'node-nav-container',
+          type: 'container',
+          name: 'Nav Container',
+          styles: {
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            maxWidth: '1200px',
+            margin: '0 auto',
+          },
+          children: [
+            {
+              id: 'node-nav-brand',
+              type: 'heading',
+              name: 'Brand Logo',
+              content: 'Helimax',
+              props: { level: 3 },
+              styles: {
+                fontSize: '22px',
+                fontWeight: '700',
+                textColor: '#10B981',
+                letterSpacing: '-0.02em',
+              },
+            },
+            {
+              id: 'node-nav-links',
+              type: 'container',
+              name: 'Nav Links',
+              styles: {
+                display: 'flex',
+                gap: '24px',
+                alignItems: 'center',
+              },
+              children: [
+                {
+                  id: 'node-nav-link-1',
+                  type: 'paragraph',
+                  name: 'Nav Item: About',
+                  content: 'Our Story',
+                  styles: { fontSize: '14px', textColor: '#9CA3AF', fontWeight: '500' },
+                },
+                {
+                  id: 'node-nav-link-2',
+                  type: 'paragraph',
+                  name: 'Nav Item: Products',
+                  content: 'Herbal Blends',
+                  styles: { fontSize: '14px', textColor: '#9CA3AF', fontWeight: '500' },
+                },
+                {
+                  id: 'node-nav-link-3',
+                  type: 'paragraph',
+                  name: 'Nav Item: Consult',
+                  content: 'Consultations',
+                  styles: { fontSize: '14px', textColor: '#9CA3AF', fontWeight: '500' },
+                },
+                {
+                  id: 'node-nav-cta',
+                  type: 'button',
+                  name: 'Nav CTA Button',
+                  content: 'Book Consultation',
+                  props: { variant: 'primary' },
+                  styles: {
+                    backgroundColor: '#10B981',
+                    textColor: '#ffffff',
+                    padding: '8px 18px',
+                    borderRadius: '9999px',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+
+    // Hero Section (Direct match to Screenshot 2)
+    {
+      id: 'node-hero-section',
+      type: 'section',
+      name: 'Hero',
+      styles: {
+        backgroundColor: '#141414',
+        backgroundImage: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1600&q=80',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        paddingTop: '64px',
+        paddingBottom: '80px',
+        paddingLeft: '32px',
+        paddingRight: '32px',
+        minHeight: '560px',
+        display: 'flex',
+        alignItems: 'center',
+      },
+      children: [
+        {
+          id: 'node-hero-card',
+          type: 'container',
+          name: 'Hero Content',
+          styles: {
+            maxWidth: '680px',
+            backgroundColor: '#161616',
+            padding: '36px',
+            borderRadius: '16px',
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderColor: '#262626',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+          },
+          children: [
+            {
+              id: 'node-hero-badge',
+              type: 'badge',
+              name: 'Eyebrow',
+              content: 'OUR OPERATIONS',
+              styles: {
+                textColor: '#10B981',
+                fontSize: '11px',
+                fontWeight: '700',
+                letterSpacing: '0.12em',
+                marginBottom: '16px',
+                display: 'inline-block',
+              },
+            },
+            {
+              id: 'node-hero-title',
+              type: 'heading',
+              name: 'Heading',
+              content: "Caring with God's Nature's Gift",
+              props: {
+                level: 1,
+                highlightText: "God's Nature's",
+              },
+              styles: {
+                fontSize: '44px',
+                fontWeight: '800',
+                textColor: '#FFFFFF',
+                lineHeight: '1.15',
+                marginBottom: '20px',
+                letterSpacing: '-0.02em',
+              },
+            },
+            {
+              id: 'node-hero-paragraph',
+              type: 'paragraph',
+              name: 'Description',
+              content: 'Helimax blends herbal wisdom with medical guidance to support families through cancer and chronic illness — real herbal teas, spices, and superfoods, grown, prepared, and packaged in Ilorin, alongside personal consultations with Mrs. Motunrola Olisa.',
+              styles: {
+                fontSize: '17px',
+                textColor: '#C9CBD4',
+                lineHeight: '1.65',
+                marginBottom: '28px',
+                fontWeight: '400',
+              },
+            },
+            {
+              id: 'node-hero-button-group',
+              type: 'container',
+              name: 'Buttons',
+              styles: {
+                display: 'flex',
+                gap: '14px',
+                alignItems: 'center',
+                marginBottom: '20px',
+              },
+              children: [
+                {
+                  id: 'node-hero-btn-primary',
+                  type: 'button',
+                  name: 'Book Consultation',
+                  content: 'Book a Consultation →',
+                  props: { variant: 'primary' },
+                  styles: {
+                    backgroundColor: '#1E6B38',
+                    textColor: '#FFFFFF',
+                    padding: '12px 24px',
+                    borderRadius: '9999px',
+                    fontSize: '15px',
+                    fontWeight: '600',
+                    borderWidth: '1px',
+                    borderStyle: 'solid',
+                    borderColor: '#2DA859',
+                  },
+                },
+                {
+                  id: 'node-hero-btn-secondary',
+                  type: 'button',
+                  name: 'Shop Products',
+                  content: 'Shop Natural Products',
+                  props: { variant: 'secondary' },
+                  styles: {
+                    backgroundColor: '#1F1F1F',
+                    textColor: '#FFFFFF',
+                    padding: '12px 24px',
+                    borderRadius: '9999px',
+                    fontSize: '15px',
+                    fontWeight: '600',
+                    borderWidth: '1px',
+                    borderStyle: 'solid',
+                    borderColor: '#2E2E2E',
+                  },
+                },
+              ],
+            },
+            {
+              id: 'node-hero-whatsapp',
+              type: 'paragraph',
+              name: 'WhatsApp Link',
+              content: '💬 or chat on WhatsApp',
+              styles: {
+                textColor: '#10B981',
+                fontSize: '14px',
+                fontWeight: '500',
+              },
+            },
+          ],
+        },
+      ],
+    },
+
+    // Features Section
+    {
+      id: 'node-features-section',
+      type: 'section',
+      name: 'Features & Pillars',
+      styles: {
+        backgroundColor: '#161616',
+        paddingTop: '60px',
+        paddingBottom: '60px',
+        paddingLeft: '32px',
+        paddingRight: '32px',
+      },
+      children: [
+        {
+          id: 'node-features-container',
+          type: 'container',
+          name: 'Features Container',
+          styles: {
+            maxWidth: '1200px',
+            margin: '0 auto',
+          },
+          children: [
+            {
+              id: 'node-features-heading',
+              type: 'heading',
+              name: 'Features Title',
+              content: 'Holistic Healing Backed by Soil & Science',
+              props: { level: 2 },
+              styles: {
+                fontSize: '28px',
+                fontWeight: '700',
+                textColor: '#FFFFFF',
+                textAlign: 'center',
+                marginBottom: '12px',
+              },
+            },
+            {
+              id: 'node-features-subheading',
+              type: 'paragraph',
+              name: 'Features Subtitle',
+              content: 'Cultivated with traditional expertise and scientific purity standards in Kwara State.',
+              styles: {
+                fontSize: '15px',
+                textColor: '#94A3B8',
+                textAlign: 'center',
+                marginBottom: '44px',
+              },
+            },
+            {
+              id: 'node-features-columns',
+              type: 'columns',
+              name: '3-Column Grid',
+              styles: {
+                display: 'grid',
+                gap: '24px',
+              },
+              children: [
+                {
+                  id: 'node-feature-card-1',
+                  type: 'card',
+                  name: 'Feature Card 1',
+                  styles: {
+                    backgroundColor: '#1E1E1E',
+                    padding: '28px',
+                    borderRadius: '12px',
+                    borderWidth: '1px',
+                    borderStyle: 'solid',
+                    borderColor: '#2A2A2A',
+                  },
+                  children: [
+                    {
+                      id: 'node-feature-icon-1',
+                      type: 'badge',
+                      name: 'Icon Badge 1',
+                      content: '🌱 100% ORGANIC',
+                      styles: {
+                        textColor: '#34D399',
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        marginBottom: '12px',
+                      },
+                    },
+                    {
+                      id: 'node-feature-h-1',
+                      type: 'heading',
+                      name: 'Card 1 Title',
+                      content: 'Single-Origin Farmed',
+                      props: { level: 3 },
+                      styles: {
+                        fontSize: '18px',
+                        fontWeight: '600',
+                        textColor: '#FFFFFF',
+                        marginBottom: '8px',
+                      },
+                    },
+                    {
+                      id: 'node-feature-p-1',
+                      type: 'paragraph',
+                      name: 'Card 1 Desc',
+                      content: 'Grown without pesticides or chemical accelerants in our private regenerative farm in Ilorin.',
+                      styles: {
+                        fontSize: '14px',
+                        textColor: '#94A3B8',
+                        lineHeight: '1.5',
+                      },
+                    },
+                  ],
+                },
+                {
+                  id: 'node-feature-card-2',
+                  type: 'card',
+                  name: 'Feature Card 2',
+                  styles: {
+                    backgroundColor: '#1E1E1E',
+                    padding: '28px',
+                    borderRadius: '12px',
+                    borderWidth: '1px',
+                    borderStyle: 'solid',
+                    borderColor: '#2A2A2A',
+                  },
+                  children: [
+                    {
+                      id: 'node-feature-icon-2',
+                      type: 'badge',
+                      name: 'Icon Badge 2',
+                      content: '🔬 CLINICALLY INFORMED',
+                      styles: {
+                        textColor: '#60A5FA',
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        marginBottom: '12px',
+                      },
+                    },
+                    {
+                      id: 'node-feature-h-2',
+                      type: 'heading',
+                      name: 'Card 2 Title',
+                      content: 'Synergistic Formulations',
+                      props: { level: 3 },
+                      styles: {
+                        fontSize: '18px',
+                        fontWeight: '600',
+                        textColor: '#FFFFFF',
+                        marginBottom: '8px',
+                      },
+                    },
+                    {
+                      id: 'node-feature-p-2',
+                      type: 'paragraph',
+                      name: 'Card 2 Desc',
+                      content: 'Each blend is balanced for bio-availability, anti-inflammatory compounds, and gentle cell support.',
+                      styles: {
+                        fontSize: '14px',
+                        textColor: '#94A3B8',
+                        lineHeight: '1.5',
+                      },
+                    },
+                  ],
+                },
+                {
+                  id: 'node-feature-card-3',
+                  type: 'card',
+                  name: 'Feature Card 3',
+                  styles: {
+                    backgroundColor: '#1E1E1E',
+                    padding: '28px',
+                    borderRadius: '12px',
+                    borderWidth: '1px',
+                    borderStyle: 'solid',
+                    borderColor: '#2A2A2A',
+                  },
+                  children: [
+                    {
+                      id: 'node-feature-icon-3',
+                      type: 'badge',
+                      name: 'Icon Badge 3',
+                      content: '🤝 PERSONAL CARE',
+                      styles: {
+                        textColor: '#FBBF24',
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        marginBottom: '12px',
+                      },
+                    },
+                    {
+                      id: 'node-feature-h-3',
+                      type: 'heading',
+                      name: 'Card 3 Title',
+                      content: 'Dedicated Consultations',
+                      props: { level: 3 },
+                      styles: {
+                        fontSize: '18px',
+                        fontWeight: '600',
+                        textColor: '#FFFFFF',
+                        marginBottom: '8px',
+                      },
+                    },
+                    {
+                      id: 'node-feature-p-3',
+                      type: 'paragraph',
+                      name: 'Card 3 Desc',
+                      content: 'Direct counsel with Mrs. Motunrola Olisa tailoring herbal strategies to your health history.',
+                      styles: {
+                        fontSize: '14px',
+                        textColor: '#94A3B8',
+                        lineHeight: '1.5',
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+
+    // Footer Section
+    {
+      id: 'node-footer-section',
+      type: 'section',
+      name: 'Site Footer',
+      styles: {
+        backgroundColor: '#111111',
+        paddingTop: '40px',
+        paddingBottom: '40px',
+        paddingLeft: '32px',
+        paddingRight: '32px',
+        borderWidth: '1px 0px 0px 0px',
+        borderStyle: 'solid',
+        borderColor: '#262626',
+      },
+      children: [
+        {
+          id: 'node-footer-container',
+          type: 'container',
+          name: 'Footer Container',
+          styles: {
+            maxWidth: '1200px',
+            margin: '0 auto',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          },
+          children: [
+            {
+              id: 'node-footer-copy',
+              type: 'paragraph',
+              name: 'Copyright Note',
+              content: '© 2026 Helimax Natural Wellness. All rights reserved.',
+              styles: {
+                fontSize: '13px',
+                textColor: '#64748B',
+              },
+            },
+            {
+              id: 'node-footer-made-with',
+              type: 'paragraph',
+              name: 'Plexo Badge',
+              content: '⚡ Built with Plexo Editor 2.0',
+              styles: {
+                fontSize: '12px',
+                textColor: '#8B5CF6',
+                fontWeight: '600',
+              },
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+export const samplePagesList: PageDefinition[] = [
+  {
+    id: 'page-home',
+    name: 'Home (Helimax)',
+    slug: 'home',
+    isHome: true,
+    rootNode: sampleHomePageNode,
+  },
+  {
+    id: 'page-about',
+    name: 'Our Story & Farm',
+    slug: 'about',
+    rootNode: {
+      id: 'node-page-about',
+      type: 'page',
+      name: 'About Page',
+      styles: { backgroundColor: '#141414', textColor: '#F3F4F6' },
+      children: [
+        {
+          id: 'node-about-hero',
+          type: 'section',
+          name: 'About Hero',
+          styles: { paddingTop: '80px', paddingBottom: '80px', textAlign: 'center' },
+          children: [
+            {
+              id: 'node-about-title',
+              type: 'heading',
+              name: 'About Title',
+              content: 'Cultivating Wholeness from Soil to Soul',
+              props: { level: 1 },
+              styles: { fontSize: '38px', fontWeight: '800', textColor: '#FFFFFF', marginBottom: '16px' },
+            },
+            {
+              id: 'node-about-desc',
+              type: 'paragraph',
+              name: 'About Desc',
+              content: 'The journey of Helimax started over 25 years ago in Kwara State with one conviction: genuine nature holds profound restoration.',
+              styles: { fontSize: '16px', textColor: '#94A3B8', maxWidth: '600px', margin: '0 auto' },
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    id: 'page-products',
+    name: 'Herbal Blends & Teas',
+    slug: 'products',
+    rootNode: {
+      id: 'node-page-products',
+      type: 'page',
+      name: 'Products Page',
+      styles: { backgroundColor: '#141414', textColor: '#F3F4F6' },
+      children: [
+        {
+          id: 'node-products-hero',
+          type: 'section',
+          name: 'Products Header',
+          styles: { paddingTop: '60px', paddingBottom: '40px', textAlign: 'center' },
+          children: [
+            {
+              id: 'node-products-title',
+              type: 'heading',
+              name: 'Products Title',
+              content: 'Handcrafted Botanical Formulations',
+              props: { level: 1 },
+              styles: { fontSize: '34px', fontWeight: '700', textColor: '#FFFFFF', marginBottom: '12px' },
+            },
+            {
+              id: 'node-products-desc',
+              type: 'paragraph',
+              name: 'Products Subtitle',
+              content: 'Lab-tested for purity, harvested with gratitude.',
+              styles: { fontSize: '15px', textColor: '#94A3B8' },
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    id: 'page-contact',
+    name: 'Consultation & Contact',
+    slug: 'contact',
+    rootNode: {
+      id: 'node-page-contact',
+      type: 'page',
+      name: 'Contact Page',
+      styles: { backgroundColor: '#141414', textColor: '#F3F4F6' },
+      children: [
+        {
+          id: 'node-contact-hero',
+          type: 'section',
+          name: 'Contact Header',
+          styles: { paddingTop: '60px', paddingBottom: '40px', textAlign: 'center' },
+          children: [
+            {
+              id: 'node-contact-title',
+              type: 'heading',
+              name: 'Contact Title',
+              content: 'Schedule a Consultation',
+              props: { level: 1 },
+              styles: { fontSize: '34px', fontWeight: '700', textColor: '#FFFFFF', marginBottom: '12px' },
+            },
+            {
+              id: 'node-contact-desc',
+              type: 'paragraph',
+              name: 'Contact Subtitle',
+              content: 'Reach out directly for personalized guidance and clinical support.',
+              styles: { fontSize: '15px', textColor: '#94A3B8' },
+            },
+          ],
+        },
+      ],
+    },
+  },
+];
