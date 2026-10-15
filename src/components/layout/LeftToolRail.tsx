@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Plus,
   Layers,
@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import { useEditor } from '../../context/EditorContext';
 import { LeftSidebarTab } from '../../types/editor';
+import { ShortcutsModal } from '../modals/ShortcutsModal';
+import { SettingsModal } from '../modals/SettingsModal';
 
 interface ToolItem {
   id: LeftSidebarTab;
@@ -21,6 +23,8 @@ interface ToolItem {
 
 export const LeftToolRail: React.FC = () => {
   const { activeSidebarTab, toggleSidebarTab } = useEditor();
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const workspaceTools: ToolItem[] = [
     {
@@ -49,7 +53,7 @@ export const LeftToolRail: React.FC = () => {
     {
       id: 'sol',
       label: 'SOL AI Assistant',
-      icon: <Sparkles className="w-5 h-5 text-purple-400" />,
+      icon: <Sparkles className="w-5 h-5 text-[#96F02E]" />,
     },
   ];
 
@@ -59,25 +63,30 @@ export const LeftToolRail: React.FC = () => {
     <aside className="w-[68px] bg-[#161616] border-r border-[#242424] flex flex-col items-center justify-between py-3 shrink-0 select-none z-30 transition-colors">
       {/* Top: Brand Logo + Primary Add Action */}
       <div className="flex flex-col items-center gap-3.5 w-full">
-        {/* Plexo Mark */}
+        {/* Plexo Mark: 2x2 rounded square mark from logo image */}
         <div
           title="Plexo Workspace"
-          className="w-9 h-9 rounded-xl bg-[#7C3AED]/15 border border-[#7C3AED]/30 flex items-center justify-center text-[#A78BFA] font-bold text-sm shadow-sm select-none"
+          className="w-10 h-10 flex items-center justify-center select-none cursor-pointer hover:opacity-90 transition-opacity"
         >
-          P
+          <svg width="26" height="26" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="11" height="11" rx="3.5" fill="#96F02E" />
+            <rect x="15" y="2" width="11" height="11" rx="3.5" fill="#2E2E2E" />
+            <rect x="2" y="15" width="11" height="11" rx="3.5" fill="#2E2E2E" />
+            <rect x="15" y="15" width="11" height="11" rx="3.5" fill="#2E2E2E" />
+          </svg>
         </div>
 
-        {/* Primary + Add Action (Squircle Button) */}
+        {/* Primary + Add Action (Lime Green Squircle Button from reference image, no glow) */}
         <button
           onClick={() => toggleSidebarTab('add')}
           title="Add Elements & Sections (A)"
-          className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all cursor-pointer shadow-md active:scale-95 ${
+          className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer shadow-none active:scale-95 ${
             isAddActive
-              ? 'bg-[#7C3AED] text-white ring-2 ring-[#7C3AED]/50'
-              : 'bg-[#222222] hover:bg-[#7C3AED] text-[#EDEDED] hover:text-white border border-[#2D2D2D] hover:border-[#7C3AED]'
+              ? 'bg-[#96F02E] text-[#0A0A0A] ring-2 ring-[#96F02E]/40'
+              : 'bg-[#96F02E] hover:bg-[#85DC20] text-[#0A0A0A]'
           }`}
         >
-          <Plus className="w-5 h-5 stroke-[2.2]" />
+          <Plus className="w-5 h-5 stroke-[2.4]" />
         </button>
 
         {/* Logical Tool Group */}
@@ -91,14 +100,14 @@ export const LeftToolRail: React.FC = () => {
                 title={tool.label}
                 className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer relative group ${
                   isActive
-                    ? 'bg-[#7C3AED]/20 text-[#A78BFA] border border-[#7C3AED]/40 shadow-sm'
+                    ? 'bg-[#96F02E]/15 text-[#96F02E] border border-[#96F02E]/30 shadow-none'
                     : 'text-[#9CA3AF] hover:text-[#EDEDED] hover:bg-[#222222]'
                 }`}
               >
                 {tool.icon}
                 {/* Active Indicator Pip */}
                 {isActive && (
-                  <span className="absolute -left-1 top-1/2 -translate-y-1/2 w-1 h-3.5 rounded-r bg-[#7C3AED]" />
+                  <span className="absolute -left-1 top-1/2 -translate-y-1/2 w-1 h-3.5 rounded-r bg-[#96F02E]" />
                 )}
               </button>
             );
@@ -110,23 +119,23 @@ export const LeftToolRail: React.FC = () => {
       <div className="flex flex-col items-center gap-2 w-full pt-3 border-t border-[#242424]">
         <button
           title="Keyboard Shortcuts (?)"
-          onClick={() =>
-            alert(
-              'Plexo Shortcuts:\n\n⌘Z : Undo\n⇧⌘Z : Redo\n⌘D : Duplicate element\n⌫ : Delete element\nEsc : Deselect / Select parent\nEnter : Inline text editing\nFit : Intelligent canvas fit'
-            )
-          }
+          onClick={() => setIsShortcutsOpen(true)}
           className="w-9 h-9 rounded-xl flex items-center justify-center text-[#9CA3AF] hover:text-[#EDEDED] hover:bg-[#222222] transition-colors cursor-pointer"
         >
           <HelpCircle className="w-4 h-4" />
         </button>
         <button
           title="Workspace Settings"
-          onClick={() => alert('Plexo Workspace: v2.0 Creative Architecture')}
+          onClick={() => setIsSettingsOpen(true)}
           className="w-9 h-9 rounded-xl flex items-center justify-center text-[#9CA3AF] hover:text-[#EDEDED] hover:bg-[#222222] transition-colors cursor-pointer"
         >
           <Settings className="w-4 h-4" />
         </button>
       </div>
+
+      {/* Interactive Native Modals */}
+      <ShortcutsModal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </aside>
   );
 };

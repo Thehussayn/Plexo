@@ -51,17 +51,17 @@ export const SolPanel: React.FC = () => {
                   : 'Ask SOL to optimize the page layout, audit accessibility, or rewrite sections...'
               }
               rows={4}
-              className="w-full bg-[#1F1F1F] border border-[#2C2C2C] rounded-xl p-2.5 text-xs text-[#EDEDED] placeholder-[#6B7280] focus:outline-none focus:border-[#7C3AED] resize-none leading-relaxed transition-colors"
+              className="w-full bg-[#1F1F1F] border border-[#2C2C2C] rounded-xl p-2.5 text-xs text-[#EDEDED] placeholder-[#6B7280] focus:outline-none focus:border-[#96F02E] resize-none leading-relaxed transition-colors"
             />
             <button
               onClick={() => handleApply(prompt || 'Optimized layout hierarchy')}
               disabled={isProcessing}
-              className="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-50 text-white font-medium text-[11px] flex items-center gap-1 shadow-sm transition-all"
+              className="absolute bottom-2.5 right-2.5 px-3 py-1 rounded-lg bg-[#96F02E] hover:bg-[#85DC20] disabled:opacity-50 text-black font-semibold text-[11px] flex items-center gap-1 shadow-none transition-all cursor-pointer"
             >
               {isProcessing ? (
-                <RefreshCw className="w-3 h-3 animate-spin" />
+                <RefreshCw className="w-3 h-3 animate-spin stroke-[2.5]" />
               ) : (
-                <Send className="w-3 h-3" />
+                <Send className="w-3 h-3 stroke-[2.5]" />
               )}
               <span>Run</span>
             </button>
@@ -70,8 +70,8 @@ export const SolPanel: React.FC = () => {
 
         {/* Feedback Alert */}
         {lastAction && (
-          <div className="p-2.5 bg-purple-950/30 border border-purple-500/30 rounded-xl text-[11px] text-purple-300 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+          <div className="p-2.5 bg-[#96F02E]/10 border border-[#96F02E]/30 rounded-xl text-[11px] text-[#96F02E] flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-[#96F02E] shrink-0" />
             <span className="truncate">{lastAction}</span>
           </div>
         )}
@@ -86,13 +86,13 @@ export const SolPanel: React.FC = () => {
               <button
                 key={idx}
                 onClick={() => handleApply(s)}
-                className="w-full text-left p-2.5 bg-[#1C1C1C] hover:bg-[#252525] rounded-xl border border-[#282828] hover:border-purple-500/40 text-[11px] text-[#EDEDED] flex items-center justify-between group transition-all"
+                className="w-full text-left p-2.5 bg-[#1C1C1C] hover:bg-[#252525] rounded-xl border border-[#282828] hover:border-[#96F02E]/40 text-[11px] text-[#EDEDED] flex items-center justify-between group transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <Wand2 className="w-3 h-3 text-purple-400 shrink-0" />
+                  <Wand2 className="w-3 h-3 text-[#96F02E] shrink-0" />
                   <span className="leading-snug">{s}</span>
                 </div>
-                <ArrowRight className="w-3 h-3 text-[#6B7280] group-hover:text-purple-300 group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
+                <ArrowRight className="w-3 h-3 text-[#6B7280] group-hover:text-[#96F02E] group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
               </button>
             ))}
           </div>

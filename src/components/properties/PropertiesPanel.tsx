@@ -52,6 +52,7 @@ export const PropertiesPanel: React.FC = () => {
     selectNodes,
     selectNode,
     deleteNode,
+    deleteNodes,
     duplicateNode,
     documentTree,
     viewportMode,
@@ -233,7 +234,7 @@ export const PropertiesPanel: React.FC = () => {
 
               <button
                 onClick={() => {
-                  selectedNodeIds.forEach((id) => deleteNode(id));
+                  deleteNodes(selectedNodeIds);
                 }}
                 className="w-full flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg bg-red-950/30 hover:bg-red-900/40 border border-red-800/40 text-red-300 transition-colors cursor-pointer"
               >
@@ -401,14 +402,14 @@ export const PropertiesPanel: React.FC = () => {
                     rows={2}
                     value={selectedNode.content || ''}
                     onChange={(e) => updateNodeContent(selectedNode.id, e.target.value)}
-                    className="flex-1 bg-[#1F1F1F] border border-[#2C2C2C] rounded px-2 py-1 text-xs text-[#EDEDED] focus:outline-none focus:border-[#7C3AED] resize-y"
+                    className="flex-1 bg-[#1F1F1F] border border-[#2C2C2C] rounded px-2 py-1 text-xs text-[#EDEDED] focus:outline-none focus:border-[#96F02E] resize-y"
                   />
                 ) : (
                   <input
                     type="text"
                     value={selectedNode.content || ''}
                     onChange={(e) => updateNodeContent(selectedNode.id, e.target.value)}
-                    className="flex-1 bg-[#1F1F1F] border border-[#2C2C2C] rounded px-2 py-1 text-xs text-[#EDEDED] focus:outline-none focus:border-[#7C3AED]"
+                    className="flex-1 bg-[#1F1F1F] border border-[#2C2C2C] rounded px-2 py-1 text-xs text-[#EDEDED] focus:outline-none focus:border-[#96F02E]"
                   />
                 )}
               </div>
@@ -445,7 +446,7 @@ export const PropertiesPanel: React.FC = () => {
                     type="text"
                     value={selectedNode.props?.href || '#'}
                     onChange={(e) => updateNodeProps(selectedNode.id, { href: e.target.value })}
-                    className="flex-1 bg-[#1F1F1F] border border-[#2C2C2C] rounded px-2 py-1 text-xs text-[#EDEDED] focus:outline-none focus:border-[#7C3AED]"
+                    className="flex-1 bg-[#1F1F1F] border border-[#2C2C2C] rounded px-2 py-1 text-xs text-[#EDEDED] focus:outline-none focus:border-[#96F02E]"
                   />
                 </div>
                 <div className="flex items-center gap-2">
@@ -473,7 +474,7 @@ export const PropertiesPanel: React.FC = () => {
                   value={selectedNode.props?.alt || ''}
                   onChange={(e) => updateNodeProps(selectedNode.id, { alt: e.target.value })}
                   placeholder="Image description"
-                  className="flex-1 bg-[#1F1F1F] border border-[#2C2C2C] rounded px-2 py-1 text-xs text-[#EDEDED] focus:outline-none focus:border-[#7C3AED]"
+                  className="flex-1 bg-[#1F1F1F] border border-[#2C2C2C] rounded px-2 py-1 text-xs text-[#EDEDED] focus:outline-none focus:border-[#96F02E]"
                 />
               </div>
             )}
@@ -965,19 +966,19 @@ export const PropertiesPanel: React.FC = () => {
               <div className="flex items-center bg-[#1F1F1F] p-0.5 rounded border border-[#2C2C2C] ml-auto">
                 <button
                   onClick={() => updateNodeStyles(selectedNode.id, { isBold: !styles.isBold })}
-                  className={`p-1 rounded ${styles.isBold ? 'bg-[#7C3AED] text-white' : 'text-[#9CA3AF] hover:text-[#EDEDED]'}`}
+                  className={`p-1 rounded ${styles.isBold ? 'bg-[#96F02E] text-black font-bold' : 'text-[#9CA3AF] hover:text-[#EDEDED]'}`}
                 >
                   <Bold className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => updateNodeStyles(selectedNode.id, { isItalic: !styles.isItalic })}
-                  className={`p-1 rounded ${styles.isItalic ? 'bg-[#7C3AED] text-white' : 'text-[#9CA3AF] hover:text-[#EDEDED]'}`}
+                  className={`p-1 rounded ${styles.isItalic ? 'bg-[#96F02E] text-black font-bold' : 'text-[#9CA3AF] hover:text-[#EDEDED]'}`}
                 >
                   <Italic className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => updateNodeStyles(selectedNode.id, { isUnderline: !styles.isUnderline })}
-                  className={`p-1 rounded ${styles.isUnderline ? 'bg-[#7C3AED] text-white' : 'text-[#9CA3AF] hover:text-[#EDEDED]'}`}
+                  className={`p-1 rounded ${styles.isUnderline ? 'bg-[#96F02E] text-black font-bold' : 'text-[#9CA3AF] hover:text-[#EDEDED]'}`}
                 >
                   <Underline className="w-3.5 h-3.5" />
                 </button>

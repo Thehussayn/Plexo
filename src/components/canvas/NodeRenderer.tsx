@@ -848,7 +848,7 @@ export const NodeRenderer: React.FC<NodeRendererProps> = ({ node }) => {
         {isFreeDragging && (
           <div
             ref={coordBadgeRef}
-            className="absolute -top-7 left-1/2 -translate-x-1/2 z-50 bg-[#161A24] text-purple-300 font-mono text-[10px] px-2 py-0.5 rounded border border-purple-500/60 shadow-xl pointer-events-none whitespace-nowrap"
+            className="absolute -top-7 left-1/2 -translate-x-1/2 z-50 bg-[#161A24] text-[#96F02E] font-mono text-[10px] px-2 py-0.5 rounded border border-[#96F02E]/60 shadow-xl pointer-events-none whitespace-nowrap"
           >
             X: {styles.x || 0}px · Y: {styles.y || 0}px
           </div>
@@ -944,14 +944,14 @@ export const NodeRenderer: React.FC<NodeRendererProps> = ({ node }) => {
     ? 'relative cursor-default transition-shadow'
     : isFreeChild
     ? isSelected
-      ? 'outline outline-1 outline-[#8B5CF6] -outline-offset-1 cursor-move'
+      ? 'outline outline-1 outline-[#96F02E] -outline-offset-1 cursor-move'
       : isHovered
-      ? 'outline outline-1 outline-dashed outline-[#8B5CF6]/50 cursor-move'
+      ? 'outline outline-1 outline-dashed outline-[#96F02E]/50 cursor-move'
       : 'cursor-pointer transition-shadow'
     : isSelected
-    ? 'relative outline outline-1 outline-[#8B5CF6] -outline-offset-1 cursor-pointer'
+    ? 'relative outline outline-1 outline-[#96F02E] -outline-offset-1 cursor-pointer'
     : isHovered
-    ? 'relative outline outline-1 outline-dashed outline-[#8B5CF6]/50 cursor-pointer'
+    ? 'relative outline outline-1 outline-dashed outline-[#96F02E]/50 cursor-pointer'
     : 'relative cursor-pointer transition-shadow';
 
   const hiddenWatermarkClass = isHiddenOnCurrentDevice && !isPreviewMode
@@ -1297,13 +1297,13 @@ export const NodeRenderer: React.FC<NodeRendererProps> = ({ node }) => {
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           {...dragProps}
-          className={`${selectionClass} ${hiddenWatermarkClass} ${isSelected ? 'bg-purple-900/20' : ''} ${
+          className={`${selectionClass} ${hiddenWatermarkClass} ${isSelected ? 'bg-[#96F02E]/10' : ''} ${
             styles.customClasses || ''
           }`}
         >
           {renderInteractiveChrome()}
           {isSelected && (
-            <div className="w-full h-full flex items-center justify-center text-[10px] text-purple-400 font-mono">
+            <div className="w-full h-full flex items-center justify-center text-[10px] text-[#96F02E] font-mono">
               Spacer ({styles.minHeight || '32px'})
             </div>
           )}

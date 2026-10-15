@@ -24,6 +24,7 @@ export const CanvasControls: React.FC = () => {
     setCanvasViewMode,
     zoomIn,
     zoomOut,
+    setZoomCentered,
     resetZoom100,
     fitToPage,
     fitAllFrames,
@@ -62,7 +63,7 @@ export const CanvasControls: React.FC = () => {
           title="Select Tool (V)"
           className={`p-1.5 rounded-full transition-colors cursor-pointer ${
             canvasTool === 'select'
-              ? 'bg-[#2A2A2A] text-purple-300 shadow-sm'
+              ? 'bg-[#2A2A2A] text-[#96F02E]'
               : 'hover:text-[#EDEDED] hover:bg-[#222222]'
           }`}
         >
@@ -73,7 +74,7 @@ export const CanvasControls: React.FC = () => {
           title="Hand Tool (H or hold Space)"
           className={`p-1.5 rounded-full transition-colors cursor-pointer ${
             canvasTool === 'hand'
-              ? 'bg-[#2A2A2A] text-purple-300 shadow-sm'
+              ? 'bg-[#2A2A2A] text-[#96F02E]'
               : 'hover:text-[#EDEDED] hover:bg-[#222222]'
           }`}
         >
@@ -90,7 +91,7 @@ export const CanvasControls: React.FC = () => {
           title={`Snap to Elements: ${snapToElements ? 'ON' : 'OFF'}`}
           className={`p-1.5 rounded-full transition-colors cursor-pointer ${
             snapToElements
-              ? 'bg-[#7C3AED]/20 text-purple-300'
+              ? 'bg-[#96F02E]/15 text-[#96F02E]'
               : 'text-[#6B7280] hover:text-[#EDEDED] hover:bg-[#222222]'
           }`}
         >
@@ -101,7 +102,7 @@ export const CanvasControls: React.FC = () => {
           title={`Snap to 8px Grid: ${snapToGrid ? 'ON' : 'OFF'}`}
           className={`p-1.5 rounded-full transition-colors cursor-pointer ${
             snapToGrid
-              ? 'bg-[#7C3AED]/20 text-purple-300'
+              ? 'bg-[#96F02E]/15 text-[#96F02E]'
               : 'text-[#6B7280] hover:text-[#EDEDED] hover:bg-[#222222]'
           }`}
         >
@@ -114,7 +115,7 @@ export const CanvasControls: React.FC = () => {
       {/* Zoom Controls */}
       <div className="flex items-center gap-0.5">
         <button
-          onClick={zoomOut}
+          onClick={() => zoomOut()}
           title="Zoom out (⌘-)"
           className="p-1.5 rounded-full hover:text-[#EDEDED] hover:bg-[#222222] transition-colors cursor-pointer"
         >
@@ -137,18 +138,17 @@ export const CanvasControls: React.FC = () => {
                 <button
                   key={preset}
                   onClick={() => {
-                    setCanvasZoom(preset);
-                    setIsFitMode(false);
+                    setZoomCentered(preset);
                     setShowZoomMenu(false);
                   }}
                   className={`px-2.5 py-1 text-left text-[11px] font-mono rounded-lg transition-colors cursor-pointer flex items-center justify-between ${
                     canvasZoom === preset
-                      ? 'bg-[#7C3AED]/20 text-purple-300 font-semibold'
+                      ? 'bg-[#96F02E]/15 text-[#96F02E] font-semibold'
                       : 'text-[#9CA3AF] hover:text-[#EDEDED] hover:bg-[#242424]'
                   }`}
                 >
                   <span>{preset}%</span>
-                  {canvasZoom === preset && <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />}
+                  {canvasZoom === preset && <span className="w-1.5 h-1.5 rounded-full bg-[#96F02E]" />}
                 </button>
               ))}
             </div>
@@ -156,7 +156,7 @@ export const CanvasControls: React.FC = () => {
         </div>
 
         <button
-          onClick={zoomIn}
+          onClick={() => zoomIn()}
           title="Zoom in (⌘+)"
           className="p-1.5 rounded-full hover:text-[#EDEDED] hover:bg-[#222222] transition-colors cursor-pointer"
         >
@@ -179,7 +179,7 @@ export const CanvasControls: React.FC = () => {
           title="Fit active frame to viewport"
           className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors cursor-pointer ${
             isFitMode && canvasViewMode === 'focused'
-              ? 'bg-[#7C3AED]/20 text-[#A78BFA] border border-[#7C3AED]/40 font-semibold'
+              ? 'bg-[#96F02E]/15 text-[#96F02E] border border-[#96F02E]/30 font-semibold'
               : 'hover:text-[#EDEDED] hover:bg-[#222222]'
           }`}
         >
@@ -194,7 +194,7 @@ export const CanvasControls: React.FC = () => {
           title="View all breakpoints side-by-side"
           className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors cursor-pointer ${
             canvasViewMode === 'all'
-              ? 'bg-[#7C3AED]/20 text-[#A78BFA] border border-[#7C3AED]/40 font-semibold'
+              ? 'bg-[#96F02E]/15 text-[#96F02E] border border-[#96F02E]/30 font-semibold'
               : 'hover:text-[#EDEDED] hover:bg-[#222222]'
           }`}
         >

@@ -54,9 +54,9 @@ export const PagesPanel: React.FC = () => {
         <button
           title="Add new page"
           onClick={() => alert('New page creation dialog')}
-          className="flex items-center gap-1 text-[11px] font-medium text-purple-300 hover:text-white bg-[#7C3AED]/20 hover:bg-[#7C3AED] px-2 py-1 rounded-lg border border-[#7C3AED]/40 transition-colors cursor-pointer"
+          className="flex items-center gap-1 text-[11px] font-semibold text-black bg-[#96F02E] hover:bg-[#85DC20] px-2.5 py-1 rounded-lg transition-colors cursor-pointer shadow-none"
         >
-          <Plus className="w-3 h-3" />
+          <Plus className="w-3 h-3 stroke-[2.5]" />
           <span>New Page</span>
         </button>
       </div>
@@ -70,7 +70,7 @@ export const PagesPanel: React.FC = () => {
             placeholder="Search pages..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#1C1C1C] border border-[#2A2A2A] rounded-lg pl-8 pr-2.5 py-1.5 text-xs text-[#EDEDED] placeholder-gray-500 focus:outline-none focus:border-purple-500/60 transition-colors"
+            className="w-full bg-[#1C1C1C] border border-[#2A2A2A] rounded-lg pl-8 pr-2.5 py-1.5 text-xs text-[#EDEDED] placeholder-gray-500 focus:outline-none focus:border-[#96F02E]/60 transition-colors"
           />
         </div>
       </div>
@@ -87,14 +87,14 @@ export const PagesPanel: React.FC = () => {
               onClick={() => handleSelectPage(page.id, page.rootNode.id)}
               className={`relative flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all ${
                 isActive
-                  ? 'bg-[#7C3AED]/15 border-[#7C3AED]/50 text-white shadow-sm'
+                  ? 'bg-[#96F02E]/15 border-[#96F02E]/40 text-white'
                   : 'bg-[#1B1B1B] border-[#242424] text-gray-300 hover:bg-[#222222] hover:border-[#303030]'
               }`}
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 <div
                   className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                    isActive ? 'bg-[#7C3AED]/30 text-purple-300' : 'bg-[#242424] text-gray-400'
+                    isActive ? 'bg-[#96F02E]/25 text-[#96F02E]' : 'bg-[#242424] text-gray-400'
                   }`}
                 >
                   {page.isHome ? <Home className="w-3.5 h-3.5" /> : <FileText className="w-3.5 h-3.5" />}

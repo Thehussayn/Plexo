@@ -65,7 +65,7 @@ export const StrataPanel: React.FC = () => {
                 <div className="p-3 pt-0 border-t border-[#242424] space-y-2 mt-1">
                   <div className="grid grid-cols-4 gap-1.5 pt-2">
                     <div className="flex flex-col items-center gap-1">
-                      <div className="w-8 h-8 rounded-lg bg-[#7C3AED] shadow-sm border border-purple-400/30" />
+                      <div className="w-8 h-8 rounded-lg bg-[#96F02E] border border-[#85DC20]" />
                       <span className="text-[10px] text-[#9CA3AF] font-mono">Brand</span>
                     </div>
                     <div className="flex flex-col items-center gap-1">

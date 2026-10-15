@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Copy, Check, FileCode2, Code2 } from 'lucide-react';
+import { Copy, Check, FileCode2, Code2, X } from 'lucide-react';
 import { useEditor } from '../../context/EditorContext';
 import { PageFrame } from './PageFrame';
 import { CanvasControls } from './CanvasControls';
@@ -33,6 +33,7 @@ function generateHtml(node: DocumentNode, indent = 0): string {
 export const CanvasArea: React.FC = () => {
   const {
     viewMode,
+    setViewMode,
     documentTree,
     viewportMode,
     canvasCustomWidth,
@@ -65,6 +66,7 @@ export const CanvasArea: React.FC = () => {
   const lastMousePosRef = useRef<{ x: number; y: number } | null>(null);
   const panDistanceRef = useRef<number>(0);
   const initialFitDoneRef = useRef(false);
+  const lastObservedSizeRef = useRef<{ width: number; height: number } | null>(null);
   const isMarqueeDraggingRef = useRef<boolean>(false);
   const marqueeStartRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -142,6 +144,11 @@ export const CanvasArea: React.FC = () => {
         const width = Math.round(entry.contentRect.width);
         const height = Math.round(entry.contentRect.height);
         if (width > 0 && height > 0) {
+          const prev = lastObservedSizeRef.current;
+          if (prev && Math.abs(prev.width - width) < 2 && Math.abs(prev.height - height) < 2) {
+            continue;
+          }
+          lastObservedSizeRef.current = { width, height };
           setContainerSize({ width, height });
 
           if (!initialFitDoneRef.current) {
@@ -213,6 +220,13 @@ export const CanvasArea: React.FC = () => {
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     const isMiddleButton = e.button === 1;
     const isPrimaryWithHand = e.button === 0 && isHandMode;
+    const target = e.target as HTMLElement;
+
+    // Check if clicked on an actual page element or interactive control
+    const isOverElement = Boolean(target.closest('[id^="node-"]'));
+    const isOverInteractive = Boolean(target.closest('button, input, select, textarea, [role="button"], a'));
+
+    if (isOverInteractive) return;
 
     if (isMiddleButton || isPrimaryWithHand) {
       e.preventDefault();
@@ -220,11 +234,17 @@ export const CanvasArea: React.FC = () => {
       setIsDraggingCanvas(true);
       lastMousePosRef.current = { x: e.clientX, y: e.clientY };
       panDistanceRef.current = 0;
-    } else if (e.button === 0 && e.target === containerRef.current) {
-      // Direct click on empty canvas background: start Marquee Selection
+    } else if (e.button === 0 && !isOverElement) {
+      // Clicking on empty canvas workspace or breathing room around page frames
       (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-      isMarqueeDraggingRef.current = true;
-      marqueeStartRef.current = { x: e.clientX, y: e.clientY };
+      if (e.shiftKey) {
+        // Shift + Drag: Marquee Selection
+        isMarqueeDraggingRef.current = true;
+        marqueeStartRef.current = { x: e.clientX, y: e.clientY };
+      } else {
+        // Direct Left Click Drag: Fluid Canvas Pan
+        setIsDraggingCanvas(true);
+      }
       lastMousePosRef.current = { x: e.clientX, y: e.clientY };
       panDistanceRef.current = 0;
     }
@@ -304,8 +324,12 @@ export const CanvasArea: React.FC = () => {
     }
 
     // Deselect element when clicking empty canvas without dragging
-    if (panDistanceRef.current < 4 && e.target === containerRef.current) {
-      selectNode(null);
+    if (panDistanceRef.current < 4) {
+      const target = e.target as HTMLElement;
+      const isOverElement = Boolean(target.closest('[id^="node-"]'));
+      if (!isOverElement) {
+        selectNode(null);
+      }
     }
 
     lastMousePosRef.current = null;
@@ -405,19 +429,30 @@ export const CanvasArea: React.FC = () => {
                 </button>
               </div>
 
-              <button
-                onClick={() =>
-                  handleCopyCode(
-                    codeTab === 'html'
-                      ? generateHtml(documentTree)
-                      : JSON.stringify(documentTree, null, 2)
-                  )
-                }
-                className="flex items-center gap-1 text-xs text-[#9CA3AF] hover:text-white bg-[#1F1F1F] px-2.5 py-1 rounded-lg border border-[#2A2A2A] transition-colors cursor-pointer"
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copied ? 'Copied' : 'Copy'}</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() =>
+                    handleCopyCode(
+                      codeTab === 'html'
+                        ? generateHtml(documentTree)
+                        : JSON.stringify(documentTree, null, 2)
+                    )
+                  }
+                  className="flex items-center gap-1 text-xs text-[#9CA3AF] hover:text-white bg-[#1F1F1F] px-2.5 py-1 rounded-lg border border-[#2A2A2A] transition-colors cursor-pointer"
+                >
+                  {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copied ? 'Copied' : 'Copy'}</span>
+                </button>
+
+                <button
+                  onClick={() => setViewMode('design')}
+                  title="Close Code View (Return to Design)"
+                  className="flex items-center gap-1 text-xs text-[#9CA3AF] hover:text-white bg-[#1F1F1F] hover:bg-[#252525] px-2 py-1 rounded-lg border border-[#2A2A2A] transition-colors cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  <span>Close</span>
+                </button>
+              </div>
             </div>
 
             <pre className="text-[#EDEDED] overflow-x-auto max-h-[72vh] p-2 leading-relaxed font-mono">

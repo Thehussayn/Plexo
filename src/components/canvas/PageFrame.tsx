@@ -118,14 +118,14 @@ export const PageFrame: React.FC<PageFrameProps> = ({
             onClick={handleSelectFrame}
             className={`mb-2.5 flex items-center gap-2 px-2.5 py-1 rounded-lg text-xs font-mono transition-all cursor-pointer ${
               isFrameActive
-                ? 'bg-[#7C3AED]/20 text-purple-300 border border-[#7C3AED]/40 shadow-sm'
+                ? 'bg-[#96F02E]/15 text-[#96F02E] border border-[#96F02E]/30'
                 : isCurrentBreakpoint
                 ? 'bg-[#1C1C1C] text-[#EDEDED] border border-[#2D2D2D]'
                 : 'bg-[#161616]/80 text-[#8E8E93] hover:text-[#EDEDED] hover:bg-[#202020] border border-transparent'
             }`}
             title={`Select ${getLabel()} frame (sets editing context)`}
           >
-            <span className={isFrameActive ? 'text-purple-400' : 'text-[#8E8E93]'}>
+            <span className={isFrameActive ? 'text-[#96F02E]' : 'text-[#8E8E93]'}>
               {getIcon()}
             </span>
             <span className="font-medium tracking-tight">{getLabel()}</span>
@@ -154,7 +154,7 @@ export const PageFrame: React.FC<PageFrameProps> = ({
               onPointerUp={handlePointerUp}
               onPointerCancel={handlePointerUp}
               title="Drag to resize width"
-              className="absolute -left-3 top-1/2 -translate-y-1/2 w-1.5 h-16 rounded-full bg-[#2A2A2A] hover:bg-[#7C3AED] cursor-ew-resize z-40 transition-colors opacity-0 group-hover:opacity-100"
+              className="absolute -left-3 top-1/2 -translate-y-1/2 w-1.5 h-16 rounded-full bg-[#2A2A2A] hover:bg-[#96F02E] cursor-ew-resize z-40 transition-colors opacity-0 group-hover:opacity-100"
             />
           )}
 
@@ -172,21 +172,21 @@ export const PageFrame: React.FC<PageFrameProps> = ({
             }}
             className={`bg-[#141414] rounded-xl shadow-2xl border overflow-hidden transition-colors ${
               isFrameActive
-                ? 'border-[#7C3AED] ring-1 ring-[#7C3AED]/30'
+                ? 'border-[#96F02E] ring-1 ring-[#96F02E]/30'
                 : 'border-[#242424] hover:border-[#383838]'
             }`}
           >
             <NodeRenderer node={documentTree} />
             {!isPreviewMode && (
-              <div className="p-4 flex items-center justify-center border-t border-dashed border-[#242424] hover:border-[#7C3AED]/40 bg-[#161616]/40 transition-colors">
+              <div className="p-4 flex items-center justify-center border-t border-dashed border-[#242424] hover:border-[#96F02E]/40 bg-[#161616]/40 transition-colors">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     addSection();
                   }}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#202020] hover:bg-[#7C3AED] text-[#9CA3AF] hover:text-white border border-[#2D2D2D] hover:border-[#7C3AED] text-xs font-medium transition-all cursor-pointer shadow-sm active:scale-95 group"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#202020] hover:bg-[#96F02E] text-[#9CA3AF] hover:text-[#0A0A0A] border border-[#2D2D2D] hover:border-[#96F02E] text-xs font-semibold transition-all cursor-pointer shadow-none active:scale-95 group"
                 >
-                  <Plus className="w-3.5 h-3.5 group-hover:rotate-90 transition-transform" />
+                  <Plus className="w-3.5 h-3.5 group-hover:rotate-90 transition-transform stroke-[2.2]" />
                   <span>Add Section</span>
                 </button>
               </div>
@@ -200,7 +200,7 @@ export const PageFrame: React.FC<PageFrameProps> = ({
               onPointerUp={handlePointerUp}
               onPointerCancel={handlePointerUp}
               title="Drag to resize width"
-              className="absolute -right-3 top-1/2 -translate-y-1/2 w-1.5 h-16 rounded-full bg-[#2A2A2A] hover:bg-[#7C3AED] cursor-ew-resize z-40 transition-colors opacity-0 group-hover:opacity-100"
+              className="absolute -right-3 top-1/2 -translate-y-1/2 w-1.5 h-16 rounded-full bg-[#2A2A2A] hover:bg-[#96F02E] cursor-ew-resize z-40 transition-colors opacity-0 group-hover:opacity-100"
             />
           )}
         </div>

@@ -182,7 +182,7 @@ const LayerItem: React.FC<LayerItemProps> = ({ node, depth }) => {
         style={{ paddingLeft: `${depth * 12 + 6}px` }}
         className={`group relative flex items-center justify-between h-[26px] pr-1.5 rounded text-xs cursor-pointer transition-colors ${
           isSelected
-            ? 'bg-[#7C3AED]/20 text-white font-medium'
+            ? 'bg-[#96F02E]/15 text-white font-medium border-l-2 border-[#96F02E]'
             : isHovered
             ? 'bg-[#242424] text-[#EDEDED]'
             : 'text-[#9CA3AF] hover:bg-[#1F1F1F]'
@@ -219,32 +219,6 @@ const LayerItem: React.FC<LayerItemProps> = ({ node, depth }) => {
           {/* Node Name */}
           <span className="truncate select-none text-[11px] leading-none">{node.name}</span>
 
-          {/* Layout Mode Badge */}
-          {node.styles.layoutMode === 'free' && (
-            <span
-              title="Free Layout Container"
-              className="text-[9px] px-1 py-0.2 rounded bg-purple-950/70 text-purple-300 border border-purple-800/40 font-mono shrink-0"
-            >
-              free
-            </span>
-          )}
-          {node.styles.position === 'absolute' && node.type !== 'page' && (
-            <span
-              title="Free Position (Absolute)"
-              className="text-[9px] px-1 py-0.2 rounded bg-purple-950/70 text-purple-300 border border-purple-800/40 font-mono shrink-0"
-            >
-              free
-            </span>
-          )}
-          {node.styles.layoutMode === 'grid' && (
-            <span
-              title="CSS Grid Layout"
-              className="text-[9px] px-1 py-0.2 rounded bg-cyan-950/70 text-cyan-300 border border-cyan-800/40 font-mono shrink-0"
-            >
-              grid
-            </span>
-          )}
-
           {/* Responsive Hidden Indicator */}
           {((viewportMode === 'desktop' && node.responsiveVisibility?.hideOnDesktop) ||
             (viewportMode === 'tablet' && node.responsiveVisibility?.hideOnTablet) ||
@@ -255,7 +229,7 @@ const LayerItem: React.FC<LayerItemProps> = ({ node, depth }) => {
           )}
         </div>
 
-        {/* Actions (Lock and Eye only) */}
+        {/* Actions (Lock and Eye only - kept in current position with enhanced clickability) */}
         <div
           className={`flex items-center gap-0.5 shrink-0 transition-opacity ${
             isSelected || node.hidden || node.locked
@@ -265,26 +239,32 @@ const LayerItem: React.FC<LayerItemProps> = ({ node, depth }) => {
         >
           {/* Lock */}
           <button
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => {
               e.stopPropagation();
+              e.preventDefault();
               toggleNodeLock(node.id);
             }}
             title={node.locked ? 'Unlock element' : 'Lock element'}
-            className="p-1 rounded text-[#9CA3AF] hover:text-[#EDEDED] hover:bg-[#2C2C2C]"
+            className="w-6 h-6 flex items-center justify-center rounded text-[#9CA3AF] hover:text-[#EDEDED] hover:bg-[#2C2C2C] cursor-pointer"
           >
-            {node.locked ? <Lock className="w-2.5 h-2.5 text-amber-400" /> : <Unlock className="w-2.5 h-2.5" />}
+            {node.locked ? <Lock className="w-3 h-3 text-amber-400" /> : <Unlock className="w-3 h-3" />}
           </button>
 
           {/* Visibility (Eye) */}
           <button
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => {
               e.stopPropagation();
+              e.preventDefault();
               toggleNodeVisibility(node.id);
             }}
             title={node.hidden ? 'Show element' : 'Hide element'}
-            className="p-1 rounded text-[#9CA3AF] hover:text-[#EDEDED] hover:bg-[#2C2C2C]"
+            className="w-6 h-6 flex items-center justify-center rounded text-[#9CA3AF] hover:text-[#EDEDED] hover:bg-[#2C2C2C] cursor-pointer"
           >
-            {node.hidden ? <EyeOff className="w-2.5 h-2.5 text-red-400" /> : <Eye className="w-2.5 h-2.5" />}
+            {node.hidden ? <EyeOff className="w-3 h-3 text-red-400" /> : <Eye className="w-3 h-3" />}
           </button>
         </div>
       </div>

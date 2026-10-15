@@ -17,17 +17,17 @@ export const FlyoutDrawer: React.FC = () => {
     switch (activeSidebarTab) {
       case 'add':
       case 'insert':
-        return { label: 'Add Elements', icon: <Plus className="w-3.5 h-3.5 text-purple-400" /> };
+        return { label: 'Add Elements', icon: <Plus className="w-3.5 h-3.5 text-[#96F02E]" /> };
       case 'layers':
-        return { label: 'Layers', icon: <Layers className="w-3.5 h-3.5 text-purple-400" /> };
+        return { label: 'Layers', icon: <Layers className="w-3.5 h-3.5 text-[#96F02E]" /> };
       case 'pages':
-        return { label: 'Pages', icon: <FileText className="w-3.5 h-3.5 text-purple-400" /> };
+        return { label: 'Pages', icon: <FileText className="w-3.5 h-3.5 text-[#96F02E]" /> };
       case 'strata':
-        return { label: 'Strata & Tokens', icon: <Boxes className="w-3.5 h-3.5 text-purple-400" /> };
+        return { label: 'Strata & Tokens', icon: <Boxes className="w-3.5 h-3.5 text-[#96F02E]" /> };
       case 'library':
-        return { label: 'Component Library', icon: <LayoutGrid className="w-3.5 h-3.5 text-purple-400" /> };
+        return { label: 'Component Library', icon: <LayoutGrid className="w-3.5 h-3.5 text-[#96F02E]" /> };
       case 'sol':
-        return { label: 'SOL Assistant', icon: <Sparkles className="w-3.5 h-3.5 text-purple-400" /> };
+        return { label: 'SOL Assistant', icon: <Sparkles className="w-3.5 h-3.5 text-[#96F02E]" /> };
       default:
         return { label: 'Workspace Tool', icon: null };
     }

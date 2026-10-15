@@ -82,8 +82,9 @@ interface EditorContextType {
   canvasViewMode: CanvasViewMode;
   setCanvasViewMode: (mode: CanvasViewMode) => void;
   setContainerSize: (size: { width: number; height: number }) => void;
-  zoomIn: () => void;
-  zoomOut: () => void;
+  zoomIn: (centerX?: number, centerY?: number) => void;
+  zoomOut: (centerX?: number, centerY?: number) => void;
+  setZoomCentered: (zoom: number, centerX?: number, centerY?: number) => void;
   resetZoom100: (containerW?: number, containerH?: number) => void;
   fitToPage: (containerW?: number, containerH?: number) => void;
   fitAllFrames: (containerW?: number, containerH?: number) => void;
@@ -122,6 +123,7 @@ interface EditorContextType {
   updateNodeContent: (nodeId: string, content: string) => void;
   updateNodeProps: (nodeId: string, props: Record<string, any>) => void;
   deleteNode: (nodeId: string) => void;
+  deleteNodes: (nodeIds: string[]) => void;
   duplicateNode: (nodeId: string) => void;
   insertComponent: (parentId: string | null, componentId: string) => void;
   addSection: (name?: string) => void;
@@ -424,15 +426,53 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
   }, []);
 
-  const zoomIn = useCallback(() => {
-    setCanvasZoom((prev) => Math.min(300, Math.round((prev + 10) / 10) * 10));
+  const setZoomCentered = useCallback((targetZoom: number, centerX?: number, centerY?: number) => {
+    const clampedZoom = Math.max(25, Math.min(300, Math.round(targetZoom)));
+    setCanvasZoom((prevZoom) => {
+      if (prevZoom === clampedZoom) return prevZoom;
+      const cX = centerX ?? (containerSize.width > 0 ? containerSize.width / 2 : window.innerWidth / 2);
+      const cY = centerY ?? (containerSize.height > 0 ? containerSize.height / 2 : window.innerHeight / 2);
+      const scaleRatio = clampedZoom / prevZoom;
+      setCanvasPan((prevPan) => ({
+        x: Math.round(cX - (cX - prevPan.x) * scaleRatio),
+        y: Math.round(cY - (cY - prevPan.y) * scaleRatio),
+      }));
+      return clampedZoom;
+    });
     setIsFitMode(false);
-  }, []);
+  }, [containerSize]);
 
-  const zoomOut = useCallback(() => {
-    setCanvasZoom((prev) => Math.max(25, Math.round((prev - 10) / 10) * 10));
+  const zoomIn = useCallback((centerX?: number, centerY?: number) => {
+    setCanvasZoom((prev) => {
+      const next = Math.min(300, Math.round((prev + 10) / 10) * 10);
+      if (next === prev) return prev;
+      const cX = centerX ?? (containerSize.width > 0 ? containerSize.width / 2 : window.innerWidth / 2);
+      const cY = centerY ?? (containerSize.height > 0 ? containerSize.height / 2 : window.innerHeight / 2);
+      const scaleRatio = next / prev;
+      setCanvasPan((prevPan) => ({
+        x: Math.round(cX - (cX - prevPan.x) * scaleRatio),
+        y: Math.round(cY - (cY - prevPan.y) * scaleRatio),
+      }));
+      return next;
+    });
     setIsFitMode(false);
-  }, []);
+  }, [containerSize]);
+
+  const zoomOut = useCallback((centerX?: number, centerY?: number) => {
+    setCanvasZoom((prev) => {
+      const next = Math.max(25, Math.round((prev - 10) / 10) * 10);
+      if (next === prev) return prev;
+      const cX = centerX ?? (containerSize.width > 0 ? containerSize.width / 2 : window.innerWidth / 2);
+      const cY = centerY ?? (containerSize.height > 0 ? containerSize.height / 2 : window.innerHeight / 2);
+      const scaleRatio = next / prev;
+      setCanvasPan((prevPan) => ({
+        x: Math.round(cX - (cX - prevPan.x) * scaleRatio),
+        y: Math.round(cY - (cY - prevPan.y) * scaleRatio),
+      }));
+      return next;
+    });
+    setIsFitMode(false);
+  }, [containerSize]);
 
   const fitToPage = useCallback((containerW?: number, containerH?: number) => {
     const width = containerW ?? containerSize.width;
@@ -914,6 +954,20 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     pushHistory(updated);
   }, [documentTree, pushHistory]);
 
+  const deleteNodes = useCallback((nodeIds: string[]) => {
+    const validIds = nodeIds.filter((id) => id !== documentTree.id);
+    if (validIds.length === 0) return;
+
+    let updated = documentTree;
+    for (const id of validIds) {
+      updated = deleteNodeFromTree(updated, id);
+      updated = deleteNodeFromTree(updated, `spacer-${id}`);
+    }
+    setSelectedNodeIds([]);
+    setEditingNodeId(null);
+    pushHistory(updated);
+  }, [documentTree, pushHistory]);
+
   const duplicateNode = useCallback((nodeId: string) => {
     if (nodeId === documentTree.id) return;
     const updated = duplicateNodeInTree(documentTree, nodeId);
@@ -1009,6 +1063,17 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     let targetId = parentId || selectedNodeId || documentTree.id;
     if (compDef.type === 'section') {
       targetId = documentTree.id;
+    } else {
+      const currentTarget = findNode(documentTree, targetId);
+      const isContainerType = (type?: string) =>
+        type === 'container' || type === 'section' || type === 'card' || type === 'column' || type === 'page';
+
+      if (currentTarget && !isContainerType(currentTarget.type)) {
+        const parentInfo = findParentNode(documentTree, currentTarget.id);
+        if (parentInfo) {
+          targetId = parentInfo.parent.id;
+        }
+      }
     }
 
     const updated = updateNodeInTree(documentTree, targetId, (node) => {
@@ -1048,12 +1113,17 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [documentTree, pushHistory, selectNode]);
 
   const toggleNodeVisibility = useCallback((nodeId: string) => {
+    const target = findNode(documentTree, nodeId);
+    const willHide = !target?.hidden;
+    if (willHide && selectedNodeIds.includes(nodeId)) {
+      setSelectedNodeIds((prev) => prev.filter((id) => id !== nodeId));
+    }
     const updated = updateNodeInTree(documentTree, nodeId, (node) => ({
       ...node,
       hidden: !node.hidden,
     }));
     pushHistory(updated);
-  }, [documentTree, pushHistory]);
+  }, [documentTree, selectedNodeIds, pushHistory]);
 
   const toggleNodeLock = useCallback((nodeId: string) => {
     const updated = updateNodeInTree(documentTree, nodeId, (node) => ({
@@ -1808,6 +1878,7 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setContainerSize,
         zoomIn,
         zoomOut,
+        setZoomCentered,
         resetZoom100,
         fitToPage,
         fitAllFrames,
@@ -1834,6 +1905,7 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         updateNodeContent,
         updateNodeProps,
         deleteNode,
+        deleteNodes,
         duplicateNode,
         insertComponent,
         addSection,

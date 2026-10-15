@@ -487,11 +487,11 @@ export const PageInspector: React.FC = () => {
                   type="button"
                   onClick={() => handleUpdate({ underlineLinks: !styles.underlineLinks })}
                   className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer ${
-                    styles.underlineLinks ? 'bg-[#7C3AED]' : 'bg-[#2A2A2A]'
+                    styles.underlineLinks ? 'bg-[#96F02E]' : 'bg-[#2A2A2A]'
                   }`}
                 >
                   <span
-                    className={`block w-4 h-4 rounded-full bg-white shadow transform transition-transform absolute top-0.5 ${
+                    className={`block w-4 h-4 rounded-full ${styles.underlineLinks ? 'bg-black' : 'bg-white'} shadow transform transition-transform absolute top-0.5 ${
                       styles.underlineLinks ? 'left-4.5' : 'left-0.5'
                     }`}
                   />
@@ -505,11 +505,11 @@ export const PageInspector: React.FC = () => {
                   type="button"
                   onClick={() => handleUpdate({ underlineOnHover: !styles.underlineOnHover })}
                   className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer ${
-                    styles.underlineOnHover ? 'bg-[#7C3AED]' : 'bg-[#2A2A2A]'
+                    styles.underlineOnHover ? 'bg-[#96F02E]' : 'bg-[#2A2A2A]'
                   }`}
                 >
                   <span
-                    className={`block w-4 h-4 rounded-full bg-white shadow transform transition-transform absolute top-0.5 ${
+                    className={`block w-4 h-4 rounded-full ${styles.underlineOnHover ? 'bg-black' : 'bg-white'} shadow transform transition-transform absolute top-0.5 ${
                       styles.underlineOnHover ? 'left-4.5' : 'left-0.5'
                     }`}
                   />

@@ -169,7 +169,7 @@ export const ResizeHandles: React.FC<ResizeHandlesProps> = ({ node, elementRef }
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
         title="Resize"
-        className="absolute -top-1 -left-1 w-2 h-2 bg-white border-[1.5px] border-[#7C3AED] rounded-[1px] cursor-nwse-resize z-40"
+        className="absolute -top-1 -left-1 w-2 h-2 bg-white border-[1.5px] border-[#96F02E] rounded-[1px] cursor-nwse-resize z-40"
       />
       <div
         onPointerDown={(e) => handlePointerDown(e, 'top-right')}
@@ -177,7 +177,7 @@ export const ResizeHandles: React.FC<ResizeHandlesProps> = ({ node, elementRef }
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
         title="Resize"
-        className="absolute -top-1 -right-1 w-2 h-2 bg-white border-[1.5px] border-[#7C3AED] rounded-[1px] cursor-nesw-resize z-40"
+        className="absolute -top-1 -right-1 w-2 h-2 bg-white border-[1.5px] border-[#96F02E] rounded-[1px] cursor-nesw-resize z-40"
       />
       <div
         onPointerDown={(e) => handlePointerDown(e, 'bottom-left')}
@@ -185,7 +185,7 @@ export const ResizeHandles: React.FC<ResizeHandlesProps> = ({ node, elementRef }
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
         title="Resize"
-        className="absolute -bottom-1 -left-1 w-2 h-2 bg-white border-[1.5px] border-[#7C3AED] rounded-[1px] cursor-nesw-resize z-40"
+        className="absolute -bottom-1 -left-1 w-2 h-2 bg-white border-[1.5px] border-[#96F02E] rounded-[1px] cursor-nesw-resize z-40"
       />
       <div
         onPointerDown={(e) => handlePointerDown(e, 'bottom-right')}
@@ -193,7 +193,7 @@ export const ResizeHandles: React.FC<ResizeHandlesProps> = ({ node, elementRef }
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
         title="Resize"
-        className="absolute -bottom-1 -right-1 w-2 h-2 bg-white border-[1.5px] border-[#7C3AED] rounded-[1px] cursor-nwse-resize z-40"
+        className="absolute -bottom-1 -right-1 w-2 h-2 bg-white border-[1.5px] border-[#96F02E] rounded-[1px] cursor-nwse-resize z-40"
       />
 
       {/* Mid-edge horizontal & vertical resize drag targets */}
@@ -203,7 +203,7 @@ export const ResizeHandles: React.FC<ResizeHandlesProps> = ({ node, elementRef }
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
         title="Resize width"
-        className="absolute -right-1 top-1/2 -translate-y-1/2 w-1.5 h-4 bg-white border-[1.5px] border-[#7C3AED] rounded-[1px] cursor-ew-resize z-40"
+        className="absolute -right-1 top-1/2 -translate-y-1/2 w-1.5 h-4 bg-white border-[1.5px] border-[#96F02E] rounded-[1px] cursor-ew-resize z-40"
       />
       <div
         onPointerDown={(e) => handlePointerDown(e, 'left')}
@@ -211,7 +211,7 @@ export const ResizeHandles: React.FC<ResizeHandlesProps> = ({ node, elementRef }
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
         title="Resize width"
-        className="absolute -left-1 top-1/2 -translate-y-1/2 w-1.5 h-4 bg-white border-[1.5px] border-[#7C3AED] rounded-[1px] cursor-ew-resize z-40"
+        className="absolute -left-1 top-1/2 -translate-y-1/2 w-1.5 h-4 bg-white border-[1.5px] border-[#96F02E] rounded-[1px] cursor-ew-resize z-40"
       />
       <div
         onPointerDown={(e) => handlePointerDown(e, 'bottom')}
@@ -219,7 +219,7 @@ export const ResizeHandles: React.FC<ResizeHandlesProps> = ({ node, elementRef }
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
         title="Resize height"
-        className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-1.5 w-4 bg-white border-[1.5px] border-[#7C3AED] rounded-[1px] cursor-ns-resize z-40"
+        className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-1.5 w-4 bg-white border-[1.5px] border-[#96F02E] rounded-[1px] cursor-ns-resize z-40"
       />
       <div
         onPointerDown={(e) => handlePointerDown(e, 'top')}
@@ -227,7 +227,7 @@ export const ResizeHandles: React.FC<ResizeHandlesProps> = ({ node, elementRef }
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
         title="Resize height"
-        className="absolute -top-1 left-1/2 -translate-x-1/2 h-1.5 w-4 bg-white border-[1.5px] border-[#7C3AED] rounded-[1px] cursor-ns-resize z-40"
+        className="absolute -top-1 left-1/2 -translate-x-1/2 h-1.5 w-4 bg-white border-[1.5px] border-[#96F02E] rounded-[1px] cursor-ns-resize z-40"
       />
     </>
   );

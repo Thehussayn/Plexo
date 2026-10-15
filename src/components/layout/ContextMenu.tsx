@@ -349,7 +349,7 @@ export const ContextMenu: React.FC = () => {
           </div>
 
           <button
-            onClick={() => runAction(zoomIn)}
+            onClick={() => runAction(() => zoomIn())}
             className="w-full flex items-center justify-between px-2.5 py-1.5 rounded hover:bg-[#242424] hover:text-white transition-colors cursor-pointer group"
           >
             <div className="flex items-center gap-2">
@@ -360,7 +360,7 @@ export const ContextMenu: React.FC = () => {
           </button>
 
           <button
-            onClick={() => runAction(zoomOut)}
+            onClick={() => runAction(() => zoomOut())}
             className="w-full flex items-center justify-between px-2.5 py-1.5 rounded hover:bg-[#242424] hover:text-white transition-colors cursor-pointer group"
           >
             <div className="flex items-center gap-2">

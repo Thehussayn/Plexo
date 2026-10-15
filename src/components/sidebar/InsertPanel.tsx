@@ -40,90 +40,12 @@ const iconMap: Record<string, React.ReactNode> = {
   LayoutGrid: <Columns className="w-4 h-4 text-gray-300" />,
 };
 
-// Additional Plexo components
-const allCatalogItems = [
-  ...insertableComponents,
-  {
-    id: 'comp-carousel',
-    name: 'Carousel',
-    type: 'container' as const,
-    icon: 'SlidersHorizontal',
-    category: 'media' as const,
-    defaultStyles: { padding: '20px', minHeight: '180px', backgroundColor: '#1A1A1A', borderRadius: '12px' },
-  },
-  {
-    id: 'comp-video',
-    name: 'Video',
-    type: 'container' as const,
-    icon: 'Video',
-    category: 'media' as const,
-    defaultStyles: { padding: '24px', minHeight: '220px', backgroundColor: '#141414', borderRadius: '12px' },
-  },
-  {
-    id: 'comp-social',
-    name: 'Social',
-    type: 'container' as const,
-    icon: 'Share2',
-    category: 'interactive' as const,
-    defaultStyles: { display: 'flex' as const, gap: '12px', padding: '12px 0' },
-  },
-  {
-    id: 'comp-menu',
-    name: 'Menu',
-    type: 'container' as const,
-    icon: 'Menu',
-    category: 'layout' as const,
-    defaultStyles: { display: 'flex' as const, gap: '16px' },
-  },
-  {
-    id: 'comp-html',
-    name: 'HTML',
-    type: 'container' as const,
-    icon: 'Code2',
-    category: 'interactive' as const,
-    defaultStyles: { padding: '16px', fontFamily: 'monospace', fontSize: '13px' },
-  },
-  {
-    id: 'comp-table',
-    name: 'Table',
-    type: 'container' as const,
-    icon: 'Table',
-    category: 'layout' as const,
-    defaultStyles: { width: '100%', minHeight: '120px' },
-  },
-  {
-    id: 'comp-timer',
-    name: 'Timer',
-    type: 'badge' as const,
-    icon: 'Clock',
-    category: 'interactive' as const,
-    defaultContent: '02 : 14 : 35',
-    defaultStyles: { fontSize: '20px', fontWeight: '700', textColor: '#F59E0B' },
-  },
-  {
-    id: 'comp-form',
-    name: 'Form',
-    type: 'container' as const,
-    icon: 'CheckSquare',
-    category: 'interactive' as const,
-    defaultStyles: { padding: '24px', backgroundColor: '#141414', borderRadius: '12px', width: '100%' },
-  },
-  {
-    id: 'comp-accordion',
-    name: 'Accordion',
-    type: 'container' as const,
-    icon: 'ChevronDownSquare',
-    category: 'layout' as const,
-    defaultStyles: { padding: '16px', backgroundColor: '#181818', borderRadius: '8px', width: '100%' },
-  },
-];
-
 export const InsertPanel: React.FC = () => {
   const { insertComponent, addSection, selectedNode } = useEditor();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'layout' | 'typography' | 'media' | 'interactive'>('all');
 
-  const filteredItems = allCatalogItems.filter((item) => {
+  const filteredItems = insertableComponents.filter((item) => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
     return matchesSearch && matchesCategory;
@@ -145,17 +67,8 @@ export const InsertPanel: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full overflow-hidden select-none bg-[#161616]">
-      {/* Header, Add Section & Search */}
+      {/* Search & Categories */}
       <div className="p-3 border-b border-[#242424] space-y-2.5 bg-[#141414]">
-        {/* Primary Add Section Action */}
-        <button
-          onClick={() => addSection()}
-          className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold shadow-lg shadow-purple-950/40 transition-all cursor-pointer active:scale-[0.98] group"
-        >
-          <Plus className="w-4 h-4 stroke-[2.5] group-hover:rotate-90 transition-transform" />
-          <span>Add Section</span>
-        </button>
-
         {/* Search input */}
         <div className="relative">
           <Search className="w-3.5 h-3.5 text-gray-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
@@ -164,7 +77,7 @@ export const InsertPanel: React.FC = () => {
             placeholder="Search elements..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#1C1C1C] border border-[#2A2A2A] rounded-lg pl-8 pr-3 py-1.5 text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-[#7C3AED]/60 transition-colors"
+            className="w-full bg-[#1C1C1C] border border-[#2A2A2A] rounded-lg pl-8 pr-3 py-1.5 text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-[#96F02E]/60 transition-colors"
           />
         </div>
 
@@ -176,7 +89,7 @@ export const InsertPanel: React.FC = () => {
               onClick={() => setSelectedCategory(cat)}
               className={`px-2 py-0.5 rounded-md capitalize whitespace-nowrap transition-colors ${
                 selectedCategory === cat
-                  ? 'bg-[#7C3AED] text-white font-medium'
+                  ? 'bg-[#96F02E] text-black font-semibold'
                   : 'bg-[#202020] text-gray-400 hover:text-gray-200'
               }`}
             >
@@ -189,7 +102,7 @@ export const InsertPanel: React.FC = () => {
       {/* Target insertion indicator */}
       <div className="px-3 py-1.5 bg-[#141414] border-b border-[#242424] text-[11px] text-gray-400 flex items-center justify-between">
         <span>Target:</span>
-        <span className="font-semibold text-purple-300 truncate max-w-[140px]">
+        <span className="font-semibold text-[#96F02E] truncate max-w-[140px]">
           {selectedNode ? selectedNode.name : 'Page Root'}
         </span>
       </div>
@@ -201,9 +114,9 @@ export const InsertPanel: React.FC = () => {
             <button
               key={comp.id}
               onClick={() => insertComponent(null, comp.id)}
-              className="flex flex-col items-center justify-center p-3 rounded-xl bg-[#1B1B1B] hover:bg-[#222222] border border-[#262626] hover:border-[#7C3AED]/40 group transition-all cursor-pointer shadow-sm active:scale-95 text-left"
+              className="flex flex-col items-center justify-center p-3 rounded-xl bg-[#1B1B1B] hover:bg-[#222222] border border-[#262626] hover:border-[#96F02E]/40 group transition-all cursor-pointer shadow-sm active:scale-95 text-left"
             >
-              <div className="w-8 h-8 rounded-lg bg-[#242424] group-hover:bg-[#7C3AED]/20 flex items-center justify-center mb-1.5 text-gray-300 group-hover:text-purple-300 transition-colors">
+              <div className="w-8 h-8 rounded-lg bg-[#242424] group-hover:bg-[#96F02E]/15 flex items-center justify-center mb-1.5 text-gray-300 group-hover:text-[#96F02E] transition-colors">
                 {renderIcon(comp.icon)}
               </div>
               <span className="text-[11px] font-medium text-gray-200 group-hover:text-white text-center leading-tight">

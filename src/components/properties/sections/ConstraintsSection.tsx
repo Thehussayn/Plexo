@@ -201,7 +201,7 @@ export const ConstraintsSection: React.FC<ConstraintsSectionProps> = ({ node }) 
             <select
               value={hConstraint}
               onChange={(e) => handleHChange(e.target.value as HorizontalConstraint)}
-              className="w-full bg-[#1C1C1C] text-[#EDEDED] text-xs px-2 py-1 rounded border border-[#2D2D2D] hover:border-[#3D3D3D] focus:border-[#7C3AED] focus:outline-none cursor-pointer"
+              className="w-full bg-[#1C1C1C] text-[#EDEDED] text-xs px-2 py-1 rounded border border-[#2D2D2D] hover:border-[#3D3D3D] focus:border-[#96F02E] focus:outline-none cursor-pointer"
             >
               <option value="left" className="bg-[#1C1C1C]">Left</option>
               <option value="right" className="bg-[#1C1C1C]">Right</option>
@@ -236,7 +236,7 @@ export const ConstraintsSection: React.FC<ConstraintsSectionProps> = ({ node }) 
             <select
               value={vConstraint}
               onChange={(e) => handleVChange(e.target.value as VerticalConstraint)}
-              className="w-full bg-[#1C1C1C] text-[#EDEDED] text-xs px-2 py-1 rounded border border-[#2D2D2D] hover:border-[#3D3D3D] focus:border-[#7C3AED] focus:outline-none cursor-pointer"
+              className="w-full bg-[#1C1C1C] text-[#EDEDED] text-xs px-2 py-1 rounded border border-[#2D2D2D] hover:border-[#3D3D3D] focus:border-[#96F02E] focus:outline-none cursor-pointer"
             >
               <option value="top" className="bg-[#1C1C1C]">Top</option>
               <option value="bottom" className="bg-[#1C1C1C]">Bottom</option>

@@ -32,14 +32,14 @@ export const BreakpointIndicator: React.FC<BreakpointIndicatorProps> = ({
   if (hasOverride) {
     return (
       <div className="relative inline-flex items-center gap-1 select-none">
-        {/* Subtle Purple Dot with Tooltip on Hover */}
+        {/* Subtle Lime Green Dot with Tooltip on Hover */}
         <div
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
           className="flex items-center gap-1 cursor-help"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse shadow-sm" />
-          <span className="text-[10px] text-purple-300 font-medium hidden sm:inline">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#96F02E] animate-pulse" />
+          <span className="text-[10px] text-[#96F02E] font-medium hidden sm:inline">
             Override
           </span>
         </div>
@@ -51,15 +51,15 @@ export const BreakpointIndicator: React.FC<BreakpointIndicatorProps> = ({
             resetResponsiveStyle(node.id, propKey);
           }}
           title={`Reset to inherited (${formattedInherited})`}
-          className="p-0.5 text-gray-400 hover:text-white hover:bg-purple-900/50 rounded transition-colors group"
+          className="p-0.5 text-gray-400 hover:text-white hover:bg-[#96F02E]/20 rounded transition-colors group cursor-pointer"
         >
-          <RotateCcw className="w-2.5 h-2.5 group-hover:rotate-[-45deg] transition-transform text-purple-300" />
+          <RotateCcw className="w-2.5 h-2.5 group-hover:rotate-[-45deg] transition-transform text-[#96F02E]" />
         </button>
 
         {/* Informative Floating Tooltip on Hover */}
         {showTooltip && (
-          <div className="absolute right-0 bottom-full mb-1 z-50 bg-[#121624] border border-purple-500/50 rounded-md px-2 py-1 shadow-xl text-[10px] whitespace-nowrap pointer-events-none">
-            <span className="text-purple-300 font-semibold">{viewportMode} override: </span>
+          <div className="absolute right-0 bottom-full mb-1 z-50 bg-[#161616] border border-[#96F02E]/40 rounded-md px-2 py-1 shadow-xl text-[10px] whitespace-nowrap pointer-events-none">
+            <span className="text-[#96F02E] font-semibold">{viewportMode} override: </span>
             <span className="text-white">{String(currentValue)}</span>
             <div className="text-gray-400 text-[9px]">
               Inherited was: <span className="text-gray-200">{formattedInherited}</span>
@@ -82,9 +82,9 @@ export const BreakpointIndicator: React.FC<BreakpointIndicatorProps> = ({
       </span>
 
       {showTooltip && (
-        <div className="absolute right-0 bottom-full mb-1 z-50 bg-[#121624] border border-[#263148] rounded-md px-2 py-1 shadow-xl text-[10px] whitespace-nowrap pointer-events-none">
+        <div className="absolute right-0 bottom-full mb-1 z-50 bg-[#161616] border border-[#2A2A2A] rounded-md px-2 py-1 shadow-xl text-[10px] whitespace-nowrap pointer-events-none">
           <span className="text-gray-300">Inherited from Desktop: </span>
-          <span className="text-purple-300 font-mono font-medium">{formattedInherited}</span>
+          <span className="text-[#96F02E] font-mono font-medium">{formattedInherited}</span>
         </div>
       )}
     </div>
